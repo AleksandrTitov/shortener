@@ -4,31 +4,39 @@ import (
 	"github.com/AleksandrTitov/shortener/internal/repository"
 )
 
-type InMemoryStorage struct {
+type Storage struct {
 	Store map[string]string
 }
 
-func NewInMemoryStorage() repository.Repository {
-	return &InMemoryStorage{
+func NewStorage() repository.Repository {
+	return &Storage{
 		Store: make(map[string]string),
 	}
 }
 
-func (ms *InMemoryStorage) Set(id, url string) error {
-	ms.Store[id] = url
+func (s *Storage) Set(id, url string) error {
+	s.Store[id] = url
 	return nil
 }
 
-func (ms *InMemoryStorage) Get(id string) (string, bool) {
-	url, ok := ms.Store[id]
+func (s *Storage) Get(id string) (string, bool) {
+	url, ok := s.Store[id]
 	return url, ok
 }
 
-func (ms *InMemoryStorage) GetAll() map[string]string {
-	return ms.Store
+func (s *Storage) GetAll() map[string]string {
+	return s.Store
 }
 
-func (ms *InMemoryStorage) Unic(id string) bool {
-	_, ok := ms.Store[id]
+func (s *Storage) Unic(id string) bool {
+	_, ok := s.Store[id]
 	return !ok
+}
+
+func (s *Storage) Delete(id string) bool {
+	_, ok := s.Store[id]
+	if ok {
+		delete(s.Store, id)
+	}
+	return ok
 }

@@ -74,7 +74,7 @@ func Test_GetOriginalURL(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			// Создаем MemoryStorage и записываем туда значения
-			repo := memory.NewInMemoryStorage()
+			repo := memory.NewStorage()
 			err := repo.Set(test.id, test.url)
 			require.NoError(t, err)
 
@@ -113,7 +113,7 @@ func TestHTTPOk_GetSorterURL(t *testing.T) {
 		req.Header.Set("Content-Type", contentType)
 		w := httptest.NewRecorder()
 
-		repo := memory.NewInMemoryStorage()
+		repo := memory.NewStorage()
 		GetSorterURL(repo).ServeHTTP(w, req)
 
 		// Получаем URL ID соответствующий test.url
@@ -185,7 +185,7 @@ func TestHTTPError_GetSorterURL(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			// Создаем MemoryStorage
-			repo := memory.NewInMemoryStorage()
+			repo := memory.NewStorage()
 
 			// Выполняем запрос
 			GetSorterURL(repo).ServeHTTP(w, req)
