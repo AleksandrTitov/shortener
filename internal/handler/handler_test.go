@@ -85,10 +85,10 @@ func Test_GetOriginalURL(t *testing.T) {
 			res := w.Result()
 
 			// Проверяем HTTP Статус код
-			assert.Equal(t, test.code, w.Result().StatusCode)
+			assert.Equal(t, test.code, res.StatusCode)
 
 			// Проверяем заголовок `Location`
-			assert.Equal(t, test.url, w.Header().Get("Location"))
+			assert.Equal(t, test.url, res.Header.Get("Location"))
 
 			// Получаем тело запроса и проверяем его
 			defer res.Body.Close()
@@ -177,20 +177,21 @@ func TestHTTPError_GetSorterURL(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			req := httptest.NewRequest(test.method, "/", strings.NewReader(test.url))
 			req.Header.Set("Content-Type", test.contentType)
-			res := httptest.NewRecorder()
+			w := httptest.NewRecorder()
 
 			repo := memory.NewInMemoryStorage()
-			GetSorterURL(repo).ServeHTTP(res, req)
+			GetSorterURL(repo).ServeHTTP(w, req)
+
+			res := w.Result()
 
 			// Тело ответа
-			result := res.Result()
-			defer result.Body.Close()
-			body, err := io.ReadAll(result.Body)
+			defer res.Body.Close()
+			body, err := io.ReadAll(res.Body)
 			require.NoError(t, err)
 			assert.Equal(t, test.body, string(body))
 
 			// HTTP Статус код
-			assert.Equal(t, test.code, res.Result().StatusCode)
+			assert.Equal(t, test.code, res.StatusCode)
 		})
 	}
 }
