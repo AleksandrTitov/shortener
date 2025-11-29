@@ -14,7 +14,7 @@ func main() {
 	mux.HandleFunc("/", handler.GetSorterURL(ms))
 	mux.HandleFunc("/{urlID}", handler.GetOriginalURL(ms))
 
-	err := http.ListenAndServe("localhost:8089", mux)
+	err := http.ListenAndServe("localhost:8080", mux)
 	if err != nil {
 		log.Fatalf("Не удалось запустить сервер: %v", err)
 	}
