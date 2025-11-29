@@ -1,20 +1,17 @@
 package main
 
 import (
-	"github.com/AleksandrTitov/shortener/internal/handler"
 	"github.com/AleksandrTitov/shortener/internal/repository/memory"
+	"github.com/AleksandrTitov/shortener/internal/service/router"
 	"log"
 	"net/http"
 )
 
 func main() {
-	ms := memory.NewInMemoryStorage()
+	s := memory.NewStorage()
+	r := router.NewRouter(s)
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", handler.GetSorterURL(ms))
-	mux.HandleFunc("/{urlID}", handler.GetOriginalURL(ms))
-
-	err := http.ListenAndServe("localhost:8080", mux)
+	err := http.ListenAndServe("localhost:8080", r)
 	if err != nil {
 		log.Fatalf("Не удалось запустить сервер: %v", err)
 	}

@@ -62,6 +62,7 @@ func GetOriginalURL(repo repository.Repository) http.HandlerFunc {
 		/* Нормально работает при запуске сервиса, но не работает для тестов,
 		возвращается пустое значение.
 		urlID := r.PathValue("urlID")
+		urlID := chi.URLParam(r, "urlID")
 		*/
 		urlID := r.RequestURI[1:]
 		if len(urlID) < id.LenID || len(urlID) > id.LenID {
