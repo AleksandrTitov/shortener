@@ -42,7 +42,7 @@ func GetSorterURL(repo repository.Repository) http.HandlerFunc {
 			http.Error(rw, "Не удалось записать id", http.StatusInternalServerError)
 			return
 		}
-		rw.WriteHeader(http.StatusOK)
+		rw.WriteHeader(http.StatusCreated)
 		_, err = rw.Write([]byte(fmt.Sprintf("http://%s/%s", r.Host, urlID)))
 		if err != nil {
 			// TODO: что-то более внятное

@@ -100,12 +100,12 @@ func TestHTTPOk_GetSorterURL(t *testing.T) {
 		name        = "Получение короткого URL"
 		method      = http.MethodPost
 		contentType = "text/plain"
-		origiUrl    = "http://test.aa"
-		statusCode  = http.StatusOK
+		originUrl   = "http://test.aa"
+		statusCode  = http.StatusCreated
 	)
 
 	t.Run(name, func(t *testing.T) {
-		req := httptest.NewRequest(method, "/", strings.NewReader(origiUrl))
+		req := httptest.NewRequest(method, "/", strings.NewReader(originUrl))
 		req.Header.Set("Content-Type", contentType)
 		res := httptest.NewRecorder()
 
@@ -115,7 +115,7 @@ func TestHTTPOk_GetSorterURL(t *testing.T) {
 		// Получаем URL ID соответствующий test.url
 		var urlID string
 		for k, v := range repo.GetAll() {
-			if v == origiUrl {
+			if v == originUrl {
 				urlID = k
 			}
 		}
