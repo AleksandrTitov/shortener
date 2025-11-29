@@ -90,7 +90,7 @@ func Test_GetOriginalURL(t *testing.T) {
 			// Проверяем заголовок `Location`
 			assert.Equal(t, test.url, res.Header.Get("Location"))
 
-			// Получаем тело запроса и проверяем его
+			// Получаем тело ответа и проверяем его
 			defer res.Body.Close()
 			body, err := io.ReadAll(res.Body)
 			require.NoError(t, err)
@@ -100,11 +100,13 @@ func Test_GetOriginalURL(t *testing.T) {
 }
 
 func TestHTTPOk_GetSorterURL(t *testing.T) {
-	name := "Получение короткого URL"
-	method := http.MethodPost
-	contentType := "text/plain"
-	url := "http://test.aa"
-	statusCode := http.StatusCreated
+	const (
+		name        = "Получение короткого URL"
+		method      = http.MethodPost
+		contentType = "text/plain"
+		url         = "http://test.aa"
+		statusCode  = http.StatusCreated
+	)
 
 	t.Run(name, func(t *testing.T) {
 		req := httptest.NewRequest(method, "/", strings.NewReader(url))
@@ -129,7 +131,7 @@ func TestHTTPOk_GetSorterURL(t *testing.T) {
 		// Проверяем HTTP Статус код
 		assert.Equal(t, statusCode, res.StatusCode)
 
-		// Получаем тело запроса и проверяем короткий URL в теле ответа
+		// Получаем тело ответа и проверяем короткий URL в теле ответа
 		defer res.Body.Close()
 		body, err := io.ReadAll(res.Body)
 		require.NoError(t, err)
@@ -175,23 +177,30 @@ func TestHTTPError_GetSorterURL(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			// Создаем Request
 			req := httptest.NewRequest(test.method, "/", strings.NewReader(test.url))
+			// Устанавливаем "Content-Type" для Request
 			req.Header.Set("Content-Type", test.contentType)
+			// Создаем Recorder в который будет записываться ответ
 			w := httptest.NewRecorder()
 
+			// Создаем MemoryStorage
 			repo := memory.NewInMemoryStorage()
+
+			// Выполняем запрос
 			GetSorterURL(repo).ServeHTTP(w, req)
 
+			// Получаем результат запроса
 			res := w.Result()
 
-			// Тело ответа
+			// Проверяем HTTP Статус код
+			assert.Equal(t, test.code, res.StatusCode)
+
+			// Получаем тело ответа и проверяем его
 			defer res.Body.Close()
 			body, err := io.ReadAll(res.Body)
 			require.NoError(t, err)
 			assert.Equal(t, test.body, string(body))
-
-			// HTTP Статус код
-			assert.Equal(t, test.code, res.StatusCode)
 		})
 	}
 }
