@@ -81,7 +81,7 @@ func Test_GetOriginalURL(t *testing.T) {
 
 			// Тело ответа
 			result := res.Result()
-			defer result.Body.Close()
+			result.Body.Close()
 			body, err := io.ReadAll(result.Body)
 			require.NoError(t, err)
 			assert.Equal(t, test.body, string(body))
@@ -96,13 +96,11 @@ func Test_GetOriginalURL(t *testing.T) {
 }
 
 func TestHTTPOk_GetSorterURL(t *testing.T) {
-	const (
-		name        = "Получение короткого URL"
-		method      = http.MethodPost
-		contentType = "text/plain"
-		originUrl   = "http://test.aa"
-		statusCode  = http.StatusCreated
-	)
+	name := "Получение короткого URL"
+	method := http.MethodPost
+	contentType := "text/plain"
+	originUrl := "http://test.aa"
+	statusCode := http.StatusCreated
 
 	t.Run(name, func(t *testing.T) {
 		req := httptest.NewRequest(method, "/", strings.NewReader(originUrl))
@@ -124,7 +122,7 @@ func TestHTTPOk_GetSorterURL(t *testing.T) {
 
 		// Проверяем короткий URL в теле ответа
 		result := res.Result()
-		defer result.Body.Close()
+		result.Body.Close()
 		body, err := io.ReadAll(result.Body)
 		require.NoError(t, err)
 		assert.Equal(t, fmt.Sprintf("http://%s/%s", req.Host, urlID), string(body))
