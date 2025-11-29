@@ -49,6 +49,7 @@ func GetSorterURL(repo repository.Repository) http.HandlerFunc {
 			http.Error(rw, "Ошибка ответа", http.StatusInternalServerError)
 			return
 		}
+		return
 	}
 }
 
@@ -75,5 +76,6 @@ func GetOriginalURL(repo repository.Repository) http.HandlerFunc {
 		}
 		rw.Header().Add("Location", urlOrigin)
 		rw.WriteHeader(http.StatusTemporaryRedirect)
+		return
 	}
 }
