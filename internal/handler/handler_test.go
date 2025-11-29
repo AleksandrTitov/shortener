@@ -71,26 +71,30 @@ func Test_GetOriginalURL(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			req := httptest.NewRequest(test.method, fmt.Sprintf("/%s", test.target), nil)
-			res := httptest.NewRecorder()
+			w := httptest.NewRecorder()
 
+			// Создаем MemoryStorage и записываем туда значения
 			repo := memory.NewInMemoryStorage()
 			err := repo.Set(test.id, test.url)
 			require.NoError(t, err)
 
-			GetOriginalURL(repo).ServeHTTP(res, req)
+			// Выполняем запрос
+			GetOriginalURL(repo).ServeHTTP(w, req)
 
-			// Тело ответа
-			result := res.Result()
-			result.Body.Close()
-			body, err := io.ReadAll(result.Body)
+			// Получаем результат запроса
+			res := w.Result()
+
+			// Проверяем HTTP Статус код
+			assert.Equal(t, test.code, w.Result().StatusCode)
+
+			// Проверяем заголовок `Location`
+			assert.Equal(t, test.url, w.Header().Get("Location"))
+
+			// Получаем тело запроса и проверяем его
+			defer res.Body.Close()
+			body, err := io.ReadAll(res.Body)
 			require.NoError(t, err)
 			assert.Equal(t, test.body, string(body))
-
-			// HTTP Статус код
-			assert.Equal(t, test.code, res.Result().StatusCode)
-
-			//Заголовок `Location`
-			assert.Equal(t, test.url, res.Header().Get("Location"))
 		})
 	}
 }
