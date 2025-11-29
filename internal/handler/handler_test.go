@@ -105,10 +105,10 @@ func TestHTTPOk_GetSorterURL(t *testing.T) {
 	t.Run(name, func(t *testing.T) {
 		req := httptest.NewRequest(method, "/", strings.NewReader(url))
 		req.Header.Set("Content-Type", contentType)
-		res := httptest.NewRecorder()
+		w := httptest.NewRecorder()
 
 		repo := memory.NewInMemoryStorage()
-		GetSorterURL(repo).ServeHTTP(res, req)
+		GetSorterURL(repo).ServeHTTP(w, req)
 
 		// Получаем URL ID соответствующий test.url
 		var urlID string
@@ -120,15 +120,16 @@ func TestHTTPOk_GetSorterURL(t *testing.T) {
 		// Убеждаемся в успешном поиске URL ID
 		require.NotEmpty(t, urlID, "URL ID не найден")
 
-		// Проверяем короткий URL в теле ответа
-		result := res.Result()
-		result.Body.Close()
-		body, err := io.ReadAll(result.Body)
-		require.NoError(t, err)
-		assert.Equal(t, fmt.Sprintf("http://%s/%s", req.Host, urlID), string(body))
+		res := w.Result()
 
 		// Проверяем HTTP Статус код
-		assert.Equal(t, statusCode, res.Result().StatusCode)
+		assert.Equal(t, statusCode, res.StatusCode)
+
+		// Получаем тело запроса и проверяем короткий URL в теле ответа
+		defer res.Body.Close()
+		body, err := io.ReadAll(res.Body)
+		require.NoError(t, err)
+		assert.Equal(t, fmt.Sprintf("http://%s/%s", req.Host, urlID), string(body))
 	})
 }
 
