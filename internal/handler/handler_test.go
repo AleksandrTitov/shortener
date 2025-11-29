@@ -116,15 +116,10 @@ func TestHTTPOk_GetSorterURL(t *testing.T) {
 		repo := memory.NewStorage()
 		GetSorterURL(repo).ServeHTTP(w, req)
 
-		// Получаем URL ID соответствующий test.url
-		var urlID string
-		for k, v := range repo.GetAll() {
-			if v == url {
-				urlID = k
-			}
-		}
+		// Получаем ID соответствующий URL
+		urlID, err := repo.GetByURL(url)
 		// Убеждаемся в успешном поиске URL ID
-		require.NotEmpty(t, urlID, "URL ID не найден")
+		require.NoError(t, err, "URL ID не найден")
 
 		res := w.Result()
 

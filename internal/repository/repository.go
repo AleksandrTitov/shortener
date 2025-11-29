@@ -6,4 +6,5 @@ type Repository interface {
 	GetAll() map[string]string
 	Unic(id string) bool
 	Delete(id string) bool
+	GetByURL(url string) (string, error)
 }

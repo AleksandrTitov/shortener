@@ -1,6 +1,7 @@
 package memory
 
 import (
+	"fmt"
 	"github.com/AleksandrTitov/shortener/internal/repository"
 )
 
@@ -39,4 +40,13 @@ func (s *Storage) Delete(id string) bool {
 		delete(s.Store, id)
 	}
 	return ok
+}
+
+func (s *Storage) GetByURL(url string) (string, error) {
+	for k, v := range s.GetAll() {
+		if v == url {
+			return k, nil
+		}
+	}
+	return "", fmt.Errorf("url %s не найден", url)
 }
