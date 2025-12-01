@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/AleksandrTitov/shortener/internal/config"
 	"github.com/AleksandrTitov/shortener/internal/model/id"
 	"github.com/AleksandrTitov/shortener/internal/repository/memory"
 	"io"
@@ -109,18 +110,30 @@ func TestHTTPOk_GetSorterURL(t *testing.T) {
 	)
 
 	t.Run(name, func(t *testing.T) {
+		// Создаем Request
 		req := httptest.NewRequest(method, "/", strings.NewReader(url))
+		// Устанавливаем "Content-Type" для Request
 		req.Header.Set("Content-Type", contentType)
+		// Создаем Recorder в который будет записываться ответ
 		w := httptest.NewRecorder()
 
+		// Создаем MemoryStorage
 		repo := memory.NewStorage()
-		GetSorterURL(repo).ServeHTTP(w, req)
+
+		// Создаем Config
+		conf := config.Config{
+			BaseHTTP: "https://shorter.123",
+		}
+
+		// Выполняем запрос
+		GetSorterURL(repo, &conf).ServeHTTP(w, req)
 
 		// Получаем ID соответствующий URL
 		urlID, err := repo.GetByURL(url)
 		// Убеждаемся в успешном поиске URL ID
 		require.NoError(t, err, "URL ID не найден")
 
+		// Получаем результат запроса
 		res := w.Result()
 
 		// Проверяем HTTP Статус код
@@ -130,7 +143,7 @@ func TestHTTPOk_GetSorterURL(t *testing.T) {
 		defer res.Body.Close()
 		body, err := io.ReadAll(res.Body)
 		require.NoError(t, err)
-		assert.Equal(t, fmt.Sprintf("http://%s/%s", req.Host, urlID), string(body))
+		assert.Equal(t, fmt.Sprintf("%s/%s", conf.BaseHTTP, urlID), string(body))
 	})
 }
 
@@ -182,8 +195,11 @@ func TestHTTPError_GetSorterURL(t *testing.T) {
 			// Создаем MemoryStorage
 			repo := memory.NewStorage()
 
+			// Создаем Config
+			conf := config.Config{}
+
 			// Выполняем запрос
-			GetSorterURL(repo).ServeHTTP(w, req)
+			GetSorterURL(repo, &conf).ServeHTTP(w, req)
 
 			// Получаем результат запроса
 			res := w.Result()

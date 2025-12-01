@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"github.com/AleksandrTitov/shortener/internal/config"
 	"github.com/AleksandrTitov/shortener/internal/model/id"
 	"github.com/AleksandrTitov/shortener/internal/repository"
 	"io"
@@ -9,7 +10,7 @@ import (
 	"net/url"
 )
 
-func GetSorterURL(repo repository.Repository) http.HandlerFunc {
+func GetSorterURL(repo repository.Repository, conf *config.Config) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			errorMessage := fmt.Sprintf("Разрешен только метод %s", http.MethodPost)
@@ -43,7 +44,7 @@ func GetSorterURL(repo repository.Repository) http.HandlerFunc {
 			return
 		}
 		rw.WriteHeader(http.StatusCreated)
-		_, err = rw.Write([]byte(fmt.Sprintf("http://%s/%s", r.Host, urlID)))
+		_, err = rw.Write([]byte(fmt.Sprintf("%s/%s", conf.BaseHTTP, urlID)))
 		if err != nil {
 			// TODO: что-то более внятное
 			http.Error(rw, "Ошибка ответа", http.StatusInternalServerError)

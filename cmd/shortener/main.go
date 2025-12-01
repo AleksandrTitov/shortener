@@ -9,11 +9,11 @@ import (
 )
 
 func main() {
-	s := memory.NewStorage()
-	r := router.NewRouter(s)
-	cfg := config.NewConfig()
+	conf := config.NewConfig()
+	stor := memory.NewStorage()
+	r := router.NewRouter(stor, conf)
 
-	err := http.ListenAndServe(cfg.Addr, r)
+	err := http.ListenAndServe(conf.Addr, r)
 	if err != nil {
 		log.Fatalf("Не удалось запустить сервер: %v", err)
 	}
