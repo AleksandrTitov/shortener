@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 )
 
@@ -92,13 +93,13 @@ func TestHTTPOk_GetSorterURL(t *testing.T) {
 	const (
 		name        = "Получение короткого URL"
 		contentType = "text/plain"
-		url         = "http://test.aa"
+		urlOrigin   = "http://test.aa"
 		statusCode  = http.StatusCreated
 	)
 
 	t.Run(name, func(t *testing.T) {
 		// Создаем Request
-		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(url))
+		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(urlOrigin))
 		// Устанавливаем "Content-Type" для Request
 		req.Header.Set("Content-Type", contentType)
 		// Создаем Recorder в который будет записываться ответ
@@ -116,9 +117,12 @@ func TestHTTPOk_GetSorterURL(t *testing.T) {
 		GetSorterURL(repo, &conf).ServeHTTP(w, req)
 
 		// Получаем ID соответствующий URL
-		urlID, err := repo.GetByURL(url)
+		urlID, err := repo.GetByURL(urlOrigin)
 		// Убеждаемся в успешном поиске URL ID
 		require.NoError(t, err, "URL ID не найден")
+		//Получаем короткий URL
+		urlShort, err := url.JoinPath(conf.BaseHTTP, urlID)
+		require.NoError(t, err)
 
 		// Получаем результат запроса
 		res := w.Result()
@@ -130,7 +134,7 @@ func TestHTTPOk_GetSorterURL(t *testing.T) {
 		defer res.Body.Close()
 		body, err := io.ReadAll(res.Body)
 		require.NoError(t, err)
-		assert.Equal(t, fmt.Sprintf("%s/%s", conf.BaseHTTP, urlID), string(body))
+		assert.Equal(t, urlShort, string(body))
 	})
 }
 
