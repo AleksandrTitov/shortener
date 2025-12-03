@@ -21,7 +21,8 @@ func GetSorterURL(repo repository.Repository, conf *config.Config) http.HandlerF
 		body, err := io.ReadAll(r.Body)
 		r.Body.Close()
 		if err != nil {
-			http.Error(rw, "Ошибка чтения данных запроса", http.StatusInternalServerError)
+			log.Printf("ERROR: Ошибка чтения запроса \"%v\"", err.Error())
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 		urlOrigin := string(body)
@@ -35,21 +36,22 @@ func GetSorterURL(repo repository.Repository, conf *config.Config) http.HandlerF
 		urlID := id.GetID()
 		err = repo.Set(urlID, urlOrigin)
 		if err != nil {
-			http.Error(rw, "Не удалось записать id", http.StatusInternalServerError)
+			log.Printf("ERROR: Не удалось записать id \"%s\" %v", urlID, err.Error())
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 		rw.WriteHeader(http.StatusCreated)
 
 		urlShort, err := url.JoinPath(conf.BaseHTTP, urlID)
 		if err != nil {
-			log.Printf("ERROR: Ошибка конкотенации \"%v\"", err.Error())
-			http.Error(rw, "Не удалось создать короткий URL", http.StatusInternalServerError)
+			log.Printf("ERROR: Не удалось создать короткий URL \"%v\"", err.Error())
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 		_, err = rw.Write([]byte(urlShort))
 		if err != nil {
-			// TODO: что-то более внятное
-			http.Error(rw, "Ошибка ответа", http.StatusInternalServerError)
+			log.Printf("ERROR: Не удалось записать данные \"%v\"", err.Error())
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 	}
