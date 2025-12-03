@@ -33,13 +33,23 @@ func GetSorterURL(repo repository.Repository, conf *config.Config) http.HandlerF
 			return
 		}
 
-		urlID := id.GetID()
-		err = repo.Set(urlID, urlOrigin)
+		maxAttempts := 15
+		var urlID string
+
+		for i := 1; i <= maxAttempts; i++ {
+			urlID = id.GetID()
+			err = repo.Set(urlID, urlOrigin)
+			if err == nil {
+				break
+			} else {
+				log.Printf("ERROR: Не удалось записать id \"%s\" попытка %d(%d), %v", urlID, i, maxAttempts, err.Error())
+			}
+		}
 		if err != nil {
-			log.Printf("ERROR: Не удалось записать id \"%s\" %v", urlID, err.Error())
 			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
+
 		rw.WriteHeader(http.StatusCreated)
 
 		urlShort, err := url.JoinPath(conf.BaseHTTP, urlID)

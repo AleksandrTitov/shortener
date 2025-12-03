@@ -1,7 +1,6 @@
 package memory
 
 import (
-	"fmt"
 	"github.com/AleksandrTitov/shortener/internal/repository"
 )
 
@@ -16,8 +15,13 @@ func NewStorage() repository.Repository {
 }
 
 func (s *Storage) Set(id, url string) error {
-	s.Store[id] = url
-	return nil
+	_, ok := s.Store[id]
+	if !ok {
+		s.Store[id] = url
+		return nil
+	}
+
+	return repository.ErrorAlreadyExist
 }
 
 func (s *Storage) Get(id string) (string, bool) {
@@ -48,5 +52,5 @@ func (s *Storage) GetByURL(url string) (string, error) {
 			return k, nil
 		}
 	}
-	return "", fmt.Errorf("url %s не найден", url)
+	return "", repository.ErrorNotFound
 }
