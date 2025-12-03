@@ -12,12 +12,6 @@ import (
 
 func GetSorterURL(repo repository.Repository, conf *config.Config) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			errorMessage := fmt.Sprintf("Разрешен только метод %s", http.MethodPost)
-			http.Error(rw, errorMessage, http.StatusMethodNotAllowed)
-			return
-		}
-
 		if r.Header.Get("Content-Type") != "text/plain" {
 			http.Error(rw, "Разрешен только \"Content-Type: text/plain\"", http.StatusBadRequest)
 			return
@@ -55,11 +49,6 @@ func GetSorterURL(repo repository.Repository, conf *config.Config) http.HandlerF
 
 func GetOriginalURL(repo repository.Repository) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			errorMessage := fmt.Sprintf("Разрешен только метод %s", http.MethodGet)
-			http.Error(rw, errorMessage, http.StatusMethodNotAllowed)
-			return
-		}
 		/* Нормально работает при запуске сервиса, но не работает для тестов,
 		возвращается пустое значение.
 		urlID := r.PathValue("urlID")

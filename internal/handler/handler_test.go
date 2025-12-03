@@ -19,7 +19,6 @@ import (
 func Test_GetOriginalURL(t *testing.T) {
 	tests := []struct {
 		name   string
-		method string
 		target string
 		id     string
 		url    string
@@ -28,7 +27,6 @@ func Test_GetOriginalURL(t *testing.T) {
 	}{
 		{
 			name:   "Получение оригинального URL",
-			method: http.MethodGet,
 			target: "dmiWnD",
 			id:     "dmiWnD",
 			url:    "http://test.aa",
@@ -36,42 +34,32 @@ func Test_GetOriginalURL(t *testing.T) {
 		},
 		{
 			name:   "ID не найден",
-			method: http.MethodGet,
 			target: "dmiWnD",
 			body:   "ID \"dmiWnD\" не найден\n",
 			code:   http.StatusBadRequest,
 		},
 		{
-			name:   "Не верный метод",
-			method: http.MethodPut,
-			body:   "Разрешен только метод GET\n",
-			code:   http.StatusMethodNotAllowed,
-		},
-		{
 			name:   "Длина запрашиваемого ID больше длины формата",
-			method: http.MethodGet,
 			target: "dmiWnDDD",
 			body:   fmt.Sprintf("Длина ID должна быть равна %d символам\n", id.LenID),
 			code:   http.StatusBadRequest,
 		},
 		{
 			name:   "Длина запрашиваемого ID меньше длины формата",
-			method: http.MethodGet,
 			target: "dmi",
 			body:   fmt.Sprintf("Длина ID должна быть равна %d символам\n", id.LenID),
 			code:   http.StatusBadRequest,
 		},
 		{
-			name:   "Пустой ID",
-			method: http.MethodGet,
-			body:   fmt.Sprintf("Длина ID должна быть равна %d символам\n", id.LenID),
-			code:   http.StatusBadRequest,
+			name: "Пустой ID",
+			body: fmt.Sprintf("Длина ID должна быть равна %d символам\n", id.LenID),
+			code: http.StatusBadRequest,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			req := httptest.NewRequest(test.method, fmt.Sprintf("/%s", test.target), nil)
+			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/%s", test.target), nil)
 			w := httptest.NewRecorder()
 
 			// Создаем MemoryStorage и записываем туда значения
@@ -103,7 +91,6 @@ func Test_GetOriginalURL(t *testing.T) {
 func TestHTTPOk_GetSorterURL(t *testing.T) {
 	const (
 		name        = "Получение короткого URL"
-		method      = http.MethodPost
 		contentType = "text/plain"
 		url         = "http://test.aa"
 		statusCode  = http.StatusCreated
@@ -111,7 +98,7 @@ func TestHTTPOk_GetSorterURL(t *testing.T) {
 
 	t.Run(name, func(t *testing.T) {
 		// Создаем Request
-		req := httptest.NewRequest(method, "/", strings.NewReader(url))
+		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(url))
 		// Устанавливаем "Content-Type" для Request
 		req.Header.Set("Content-Type", contentType)
 		// Создаем Recorder в который будет записываться ответ
@@ -150,32 +137,20 @@ func TestHTTPOk_GetSorterURL(t *testing.T) {
 func TestHTTPError_GetSorterURL(t *testing.T) {
 	tests := []struct {
 		name        string
-		method      string
 		contentType string
 		body        string
-		id          string
 		url         string
 		code        int
 	}{
 		{
 			name:        "Не верный Content-Type",
-			method:      http.MethodPost,
 			contentType: "text/html",
 			body:        "Разрешен только \"Content-Type: text/plain\"\n",
 			url:         "http://test.aa",
 			code:        http.StatusBadRequest,
 		},
 		{
-			name:        "Не верный метод",
-			method:      http.MethodGet,
-			contentType: "text/plain",
-			body:        fmt.Sprintf("Разрешен только метод %s\n", http.MethodPost),
-			url:         "http://test.aa",
-			code:        http.StatusMethodNotAllowed,
-		},
-		{
 			name:        "Не валидный URL",
-			method:      http.MethodPost,
 			contentType: "text/plain",
 			body:        "В данных запроса ожидаться валидный URL\n",
 			url:         "http?test.aa",
@@ -186,7 +161,7 @@ func TestHTTPError_GetSorterURL(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// Создаем Request
-			req := httptest.NewRequest(test.method, "/", strings.NewReader(test.url))
+			req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(test.url))
 			// Устанавливаем "Content-Type" для Request
 			req.Header.Set("Content-Type", test.contentType)
 			// Создаем Recorder в который будет записываться ответ
