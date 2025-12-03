@@ -6,6 +6,7 @@ import (
 	"github.com/AleksandrTitov/shortener/internal/model/id"
 	"github.com/AleksandrTitov/shortener/internal/repository"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 )
@@ -38,7 +39,14 @@ func GetSorterURL(repo repository.Repository, conf *config.Config) http.HandlerF
 			return
 		}
 		rw.WriteHeader(http.StatusCreated)
-		_, err = rw.Write([]byte(fmt.Sprintf("%s/%s", conf.BaseHTTP, urlID)))
+
+		urlShort, err := url.JoinPath(conf.BaseHTTP, urlID)
+		if err != nil {
+			log.Printf("ERROR: Ошибка конкотенации \"%v\"", err.Error())
+			http.Error(rw, "Не удалось создать короткий URL", http.StatusInternalServerError)
+			return
+		}
+		_, err = rw.Write([]byte(urlShort))
 		if err != nil {
 			// TODO: что-то более внятное
 			http.Error(rw, "Ошибка ответа", http.StatusInternalServerError)
