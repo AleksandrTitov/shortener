@@ -1,11 +1,9 @@
 package handler
 
 import (
-	"context"
 	"github.com/AleksandrTitov/shortener/internal/config"
 	"github.com/AleksandrTitov/shortener/internal/model/id"
 	"github.com/AleksandrTitov/shortener/internal/repository/memory"
-	"github.com/go-chi/chi/v5"
 	"io"
 	"strings"
 
@@ -65,12 +63,7 @@ func Test_GetOriginalURL(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/%s", test.target), nil)
 			w := httptest.NewRecorder()
 
-			// Создаем router context
-			rctx := chi.NewRouteContext()
-			// Добавляем URLParam urlID
-			rctx.URLParams.Add("urlID", test.target)
-			// Добавляем контекст к запросу
-			req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+			req.SetPathValue("urlID", test.target)
 
 			// Создаем MemoryStorage и записываем туда значения
 			repo := memory.NewStorage()

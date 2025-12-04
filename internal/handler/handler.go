@@ -5,7 +5,6 @@ import (
 	"github.com/AleksandrTitov/shortener/internal/config"
 	"github.com/AleksandrTitov/shortener/internal/model/id"
 	"github.com/AleksandrTitov/shortener/internal/repository"
-	"github.com/go-chi/chi/v5"
 	"io"
 	"log"
 	"net/http"
@@ -70,7 +69,7 @@ func GetSorterURL(repo repository.Repository, conf *config.Config) http.HandlerF
 
 func GetOriginalURL(repo repository.Repository) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		urlID := chi.URLParam(r, "urlID")
+		urlID := r.PathValue("urlID")
 
 		if len(urlID) < id.LenID || len(urlID) > id.LenID {
 			http.Error(rw, fmt.Sprintf("Длина ID должна быть равна %d символам", id.LenID), http.StatusBadRequest)
