@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"github.com/AleksandrTitov/shortener/internal/config"
 	"github.com/AleksandrTitov/shortener/internal/model/id"
@@ -39,11 +40,14 @@ func GetSorterURL(repo repository.Repository, conf *config.Config) http.HandlerF
 		for i := 1; i <= maxAttempts; i++ {
 			urlID = id.GetID()
 			err = repo.Set(urlID, urlOrigin)
-			if err == nil {
+			if errors.Is(err, repository.ErrorAlreadyExist) {
+				log.Printf("WARN: Не удалось записать id \"%s\" попытка %d(%d), %v", urlID, i, maxAttempts, err.Error())
+				continue
+			} else if err != nil {
+				log.Printf("ERROR: Не ожиданная ошибка при записи id \"%s\": %v", urlID, err)
 				break
-			} else {
-				log.Printf("ERROR: Не удалось записать id \"%s\" попытка %d(%d), %v", urlID, i, maxAttempts, err.Error())
 			}
+			break
 		}
 		if err != nil {
 			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
