@@ -147,7 +147,7 @@ func TestHTTPOk_GetSorterURL(t *testing.T) {
 type DummyGenerator struct{}
 
 func (*DummyGenerator) GetID() (string, error) {
-	return "", id.GetIDError
+	return "", id.ErrGetID
 }
 
 func TestIDErr_GetSorterURL(t *testing.T) {
