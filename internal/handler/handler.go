@@ -39,7 +39,7 @@ func GetSorterURL(repo repository.Repository, conf *config.Config, gen id.Genera
 
 		for i := 1; i <= maxAttempts; i++ {
 			urlID, err = gen.GetID()
-			if errors.Is(err, id.GetIDError) {
+			if errors.Is(err, id.ErrGetID) {
 				log.Printf("ERROR: Не удалось сгенерировать ID: %v", err.Error())
 				break
 			}

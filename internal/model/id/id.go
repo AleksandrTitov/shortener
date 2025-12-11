@@ -11,7 +11,7 @@ const (
 )
 
 var (
-	GetIDError = errors.New("ошибка генерации")
+	ErrGetID = errors.New("ошибка генерации")
 )
 
 type GeneratorID interface {
