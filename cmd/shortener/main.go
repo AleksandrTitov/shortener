@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/AleksandrTitov/shortener/internal/config"
+	"github.com/AleksandrTitov/shortener/internal/model/id"
 	"github.com/AleksandrTitov/shortener/internal/repository/memory"
 	"github.com/AleksandrTitov/shortener/internal/service/router"
 	"log"
@@ -11,7 +12,8 @@ import (
 func main() {
 	conf := config.NewConfig()
 	stor := memory.NewStorage()
-	r := router.NewRouter(stor, conf)
+	gen := id.NewGenerator()
+	r := router.NewRouter(stor, conf, gen)
 
 	err := http.ListenAndServe(conf.Addr, r)
 	if err != nil {

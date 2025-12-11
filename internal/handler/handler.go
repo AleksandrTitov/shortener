@@ -12,7 +12,7 @@ import (
 	"net/url"
 )
 
-func GetSorterURL(repo repository.Repository, conf *config.Config) http.HandlerFunc {
+func GetSorterURL(repo repository.Repository, conf *config.Config, gen id.GeneratorID) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Content-Type") != "text/plain" {
 			http.Error(rw, "Разрешен только \"Content-Type: text/plain\"", http.StatusBadRequest)
@@ -38,7 +38,11 @@ func GetSorterURL(repo repository.Repository, conf *config.Config) http.HandlerF
 		var urlID string
 
 		for i := 1; i <= maxAttempts; i++ {
-			urlID = id.GetID()
+			urlID, err = gen.GetID()
+			if errors.Is(err, id.GetIDError) {
+				log.Printf("ERROR: Не удалось сгенерировать ID: %v", err.Error())
+				break
+			}
 			err = repo.Set(urlID, urlOrigin)
 			if errors.Is(err, repository.ErrorAlreadyExist) {
 				log.Printf("WARN: Не удалось записать id \"%s\" попытка %d(%d), %v", urlID, i, maxAttempts, err.Error())
