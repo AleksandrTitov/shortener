@@ -120,7 +120,7 @@ func TestEnv_NewConfig(t *testing.T) {
 			flag.CommandLine = flag.NewFlagSet(args[0], flag.ExitOnError)
 
 			cfg := NewConfig()
-			for k, _ := range test.envs {
+			for k := range test.envs {
 				err := os.Unsetenv(k)
 				assert.NoError(t, err)
 			}
