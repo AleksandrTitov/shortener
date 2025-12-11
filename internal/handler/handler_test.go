@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bytes"
 	"github.com/AleksandrTitov/shortener/internal/config"
 	"github.com/AleksandrTitov/shortener/internal/model/id"
 	"github.com/AleksandrTitov/shortener/internal/repository/memory"
@@ -116,9 +117,10 @@ func TestHTTPOk_GetSorterURL(t *testing.T) {
 		conf := config.Config{
 			BaseHTTP: "https://shorter.123",
 		}
+		gen := id.NewGenerator()
 
 		// Выполняем запрос
-		GetSorterURL(repo, &conf).ServeHTTP(w, req)
+		GetSorterURL(repo, &conf, gen).ServeHTTP(w, req)
 
 		// Получаем ID соответствующий URL
 		urlID, err := repo.GetByURL(urlOrigin)
@@ -139,6 +141,54 @@ func TestHTTPOk_GetSorterURL(t *testing.T) {
 		body, err := io.ReadAll(res.Body)
 		require.NoError(t, err)
 		assert.Equal(t, urlShort, string(body))
+	})
+}
+
+type DummyGenerator struct{}
+
+func (*DummyGenerator) GetID() (string, error) {
+	return "", id.GetIDError
+}
+
+func TestIDErr_GetSorterURL(t *testing.T) {
+	const (
+		name        = "Ошибка генерации ID"
+		contentType = "text/plain"
+		urlOrigin   = "http://test.aa"
+		statusCode  = http.StatusInternalServerError
+	)
+
+	t.Run(name, func(t *testing.T) {
+		// Создаем Request
+		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(urlOrigin))
+		// Устанавливаем "Content-Type" для Request
+		req.Header.Set("Content-Type", contentType)
+		// Создаем Recorder в который будет записываться ответ
+		w := httptest.NewRecorder()
+
+		// Создаем MemoryStorage
+		repo := memory.NewStorage()
+
+		// Создаем Config
+		conf := config.Config{
+			BaseHTTP: "https://shorter.123",
+		}
+		gen := &DummyGenerator{}
+
+		// Выполняем запрос
+		GetSorterURL(repo, &conf, gen).ServeHTTP(w, req)
+
+		// Получаем результат запроса
+		res := w.Result()
+
+		// Проверяем HTTP Статус код
+		assert.Equal(t, statusCode, res.StatusCode)
+
+		// Получаем тело ответа и проверяем короткий URL в теле ответа
+		defer res.Body.Close()
+		body, err := io.ReadAll(res.Body)
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusText(http.StatusInternalServerError), string(bytes.TrimSpace(body)))
 	})
 }
 
@@ -181,8 +231,10 @@ func TestHTTPError_GetSorterURL(t *testing.T) {
 			// Создаем Config
 			conf := config.Config{}
 
+			gen := id.NewGenerator()
+
 			// Выполняем запрос
-			GetSorterURL(repo, &conf).ServeHTTP(w, req)
+			GetSorterURL(repo, &conf, gen).ServeHTTP(w, req)
 
 			// Получаем результат запроса
 			res := w.Result()

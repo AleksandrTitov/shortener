@@ -1,17 +1,34 @@
 package id
 
-import "math/rand"
+import (
+	"errors"
+	"math/rand"
+)
 
 const (
 	LenID   = 6
 	Symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 )
 
-func GetID() string {
+var (
+	GetIDError = errors.New("ошибка генерации")
+)
+
+type GeneratorID interface {
+	GetID() (string, error)
+}
+
+type Generator struct{}
+
+func NewGenerator() *Generator {
+	return &Generator{}
+}
+
+func (*Generator) GetID() (string, error) {
 	id := make([]byte, LenID)
 
 	for i := range len(id) {
 		id[i] = Symbols[rand.Intn(len(Symbols))]
 	}
-	return string(id)
+	return string(id), nil
 }
