@@ -3,6 +3,7 @@ package config
 import (
 	"flag"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"os"
 	"testing"
 )
@@ -111,7 +112,7 @@ func TestEnv_NewConfig(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			for k, v := range test.envs {
 				err := os.Setenv(k, v)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 			args := []string{
 				"shorter",
@@ -122,7 +123,7 @@ func TestEnv_NewConfig(t *testing.T) {
 			cfg := NewConfig()
 			for k := range test.envs {
 				err := os.Unsetenv(k)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 
 			assert.Equal(t, cfg.Addr, test.addr)
