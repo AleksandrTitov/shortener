@@ -24,9 +24,9 @@ func NewConfig() *Config {
 		config.Addr = addr
 	}
 
-	baseHttp, ok := os.LookupEnv("BASE_URL")
+	baseHTTP, ok := os.LookupEnv("BASE_URL")
 	if ok {
-		config.BaseHTTP = baseHttp
+		config.BaseHTTP = baseHTTP
 	}
 
 	log.Printf("INFO: Адрес сервера %s", config.Addr)
