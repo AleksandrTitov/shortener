@@ -17,6 +17,6 @@ func main() {
 
 	err := http.ListenAndServe(conf.Addr, r)
 	if err != nil {
-		log.Fatalf("Не удалось запустить сервер: %v", err)
+		log.Fatalf("[ERROR] Не удалось запустить сервер: %v", err)
 	}
 }
