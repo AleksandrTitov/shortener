@@ -11,11 +11,16 @@ type Config struct {
 	BaseHTTP string
 }
 
+const (
+	defaultAddr     = "localhost:8080"
+	defaultBaseHTTP = "http://localhost:8080"
+)
+
 func NewConfig() *Config {
 	var config Config
 
-	flag.StringVar(&config.Addr, "a", "localhost:8080", "Адрес сервера в формате <хост>:<порт>")
-	flag.StringVar(&config.BaseHTTP, "b", "http://localhost:8080", "HTTP адрес сервера в сокращенном URL в формате <http схема>://<хост>:<порт>")
+	flag.StringVar(&config.Addr, "a", defaultAddr, "Адрес сервера в формате <хост>:<порт>")
+	flag.StringVar(&config.BaseHTTP, "b", defaultBaseHTTP, "HTTP адрес сервера в сокращенном URL в формате <http схема>://<хост>:<порт>")
 
 	flag.Parse()
 
