@@ -44,6 +44,12 @@ func TestFlags_NewConfig(t *testing.T) {
 			flags:    []string{"--b", "https://tt.go"},
 			baseHTTP: "https://tt.go",
 		},
+		{
+			name:     "Определяем адрес и базовый URL через '-a -b'",
+			addr:     "0.0.0.0:8081",
+			flags:    []string{"-a", "0.0.0.0:8081", "-b", "http://tt.go"},
+			baseHTTP: "http://tt.go",
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -117,6 +123,68 @@ func TestEnv_NewConfig(t *testing.T) {
 			args := []string{
 				"shorter",
 			}
+			os.Args = args
+			flag.CommandLine = flag.NewFlagSet(args[0], flag.ExitOnError)
+
+			cfg := NewConfig()
+			for k := range test.envs {
+				err := os.Unsetenv(k)
+				require.NoError(t, err)
+			}
+
+			assert.Equal(t, cfg.Addr, test.addr)
+			assert.Equal(t, cfg.BaseHTTP, test.baseHTTP)
+		})
+	}
+}
+
+func TestEnvAndFlags_NewConfig(t *testing.T) {
+	tests := []struct {
+		name     string
+		envs     map[string]string
+		flags    []string
+		addr     string
+		baseHTTP string
+	}{
+		{
+			name: "Приоритет ENVs над args",
+			envs: map[string]string{
+				"BASE_URL":       "https://env.go",
+				"SERVER_ADDRESS": "localhost:8081",
+			},
+			flags:    []string{"-a", "0.0.0.0:8080", "-b", "https://arg.go"},
+			addr:     "localhost:8081",
+			baseHTTP: "https://env.go",
+		},
+		{
+			name: "Приоритет ENV 'BASE_URL' над arg '-b'",
+			envs: map[string]string{
+				"BASE_URL": "https://env.go",
+			},
+			flags:    []string{"-a", "0.0.0.0:8080", "-b", "https://arg.go"},
+			addr:     "0.0.0.0:8080",
+			baseHTTP: "https://env.go",
+		},
+		{
+			name: "Приоритет ENV 'SERVER_ADDRESS' над arg '-a'",
+			envs: map[string]string{
+				"SERVER_ADDRESS": "localhost:8081",
+			},
+			flags:    []string{"-a", "0.0.0.0:8080", "-b", "https://arg.go"},
+			addr:     "localhost:8081",
+			baseHTTP: "https://arg.go",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			for k, v := range test.envs {
+				err := os.Setenv(k, v)
+				require.NoError(t, err)
+			}
+			args := []string{
+				"shorter",
+			}
+			args = append(args, test.flags...)
 			os.Args = args
 			flag.CommandLine = flag.NewFlagSet(args[0], flag.ExitOnError)
 
