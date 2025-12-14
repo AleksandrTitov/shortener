@@ -59,7 +59,7 @@ func MiddlewareLogging(h http.HandlerFunc) http.HandlerFunc {
 		log.WithFields(logrus.Fields{
 			"uri":      r.RequestURI,
 			"method":   r.Method,
-			"duration": fmt.Sprintf("%s", time.Since(now)),
+			"duration": time.Since(now).String(),
 			"size":     humanize.Bytes(uint64(mrw.responseData.size)),
 			"status":   mrw.responseData.status,
 		}).Info("Ok")
