@@ -3,9 +3,7 @@ package logger
 import "github.com/sirupsen/logrus"
 
 func NewLogger() *logrus.Logger {
-	var log *logrus.Logger
-
-	log = logrus.New()
+	log := logrus.New()
 	log.SetFormatter(&logrus.JSONFormatter{})
 	log.SetLevel(logrus.InfoLevel)
 
