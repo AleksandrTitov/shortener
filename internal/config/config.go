@@ -2,7 +2,7 @@ package config
 
 import (
 	"flag"
-	"log"
+	"github.com/AleksandrTitov/shortener/internal/logger"
 	"os"
 )
 
@@ -19,6 +19,8 @@ const (
 func NewConfig() *Config {
 	var config Config
 
+	log := logger.NewLogger()
+
 	flag.StringVar(&config.Addr, "a", defaultAddr, "Адрес сервера в формате <хост>:<порт>")
 	flag.StringVar(&config.BaseHTTP, "b", defaultBaseHTTP, "HTTP адрес сервера в сокращенном URL в формате <http схема>://<хост>:<порт>")
 
@@ -34,7 +36,7 @@ func NewConfig() *Config {
 		config.BaseHTTP = baseHTTP
 	}
 
-	log.Printf("INFO: Адрес сервера %s", config.Addr)
+	log.Infof("Адрес сервера %s", config.Addr)
 
 	return &config
 }
