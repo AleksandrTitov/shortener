@@ -13,7 +13,7 @@ func main() {
 	conf := config.NewConfig()
 	err := logger.Initialize(conf.LogLevel, true)
 	if err != nil {
-		logger.Log.Warnf(err.Error())
+		logger.Log.Warnf("не удалось инициализировать логгер: %v", err.Error())
 	}
 	logger.Log.Infof("адрес: %s, базовый http: %s", conf.Addr, conf.BaseHTTP)
 
@@ -23,6 +23,6 @@ func main() {
 
 	err = http.ListenAndServe(conf.Addr, r)
 	if err != nil {
-		logger.Log.Errorf("Не удалось запустить сервер: %v", err)
+		logger.Log.Errorf("не удалось запустить сервер: %v", err)
 	}
 }
