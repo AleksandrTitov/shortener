@@ -10,15 +10,19 @@ import (
 )
 
 func main() {
-	log := logger.NewLogger()
-
 	conf := config.NewConfig()
+	err := logger.Initialize(conf.LogLevel, true)
+	if err != nil {
+		logger.Log.Warnf(err.Error())
+	}
+	logger.Log.Infof("адрес: %s, базовый http: %s", conf.Addr, conf.BaseHTTP)
+
 	stor := memory.NewStorage()
 	gen := id.NewGenerator()
 	r := router.NewRouter(stor, conf, gen)
 
-	err := http.ListenAndServe(conf.Addr, r)
+	err = http.ListenAndServe(conf.Addr, r)
 	if err != nil {
-		log.Errorf("Не удалось запустить сервер: %v", err)
+		logger.Log.Errorf("Не удалось запустить сервер: %v", err)
 	}
 }

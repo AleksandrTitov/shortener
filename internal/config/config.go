@@ -2,27 +2,27 @@ package config
 
 import (
 	"flag"
-	"github.com/AleksandrTitov/shortener/internal/logger"
 	"os"
 )
 
 type Config struct {
 	Addr     string
 	BaseHTTP string
+	LogLevel string
 }
 
 const (
 	defaultAddr     = "localhost:8080"
 	defaultBaseHTTP = "http://localhost:8080"
+	defaultLogLevel = "info"
 )
 
 func NewConfig() *Config {
 	var config Config
 
-	log := logger.NewLogger()
-
 	flag.StringVar(&config.Addr, "a", defaultAddr, "Адрес сервера в формате <хост>:<порт>")
 	flag.StringVar(&config.BaseHTTP, "b", defaultBaseHTTP, "HTTP адрес сервера в сокращенном URL в формате <http схема>://<хост>:<порт>")
+	flag.StringVar(&config.LogLevel, "l", defaultLogLevel, "Уровень логирования")
 
 	flag.Parse()
 
@@ -36,7 +36,10 @@ func NewConfig() *Config {
 		config.BaseHTTP = baseHTTP
 	}
 
-	log.Infof("Адрес сервера %s", config.Addr)
+	logLevel, ok := os.LookupEnv("LOG_LEVEL")
+	if ok {
+		config.LogLevel = logLevel
+	}
 
 	return &config
 }

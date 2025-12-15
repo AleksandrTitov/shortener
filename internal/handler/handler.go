@@ -39,10 +39,9 @@ func (rw *mwResponseWriter) WriteHeader(statusCode int) {
 	rw.responseData.status = statusCode
 }
 
-func MiddlewareLogging(h http.HandlerFunc) http.HandlerFunc {
-	return func(rw http.ResponseWriter, r *http.Request) {
+func MiddlewareLogging(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		now := time.Now()
-		log := logger.NewLogger()
 
 		data := &responseData{
 			size:   0,
@@ -56,14 +55,14 @@ func MiddlewareLogging(h http.HandlerFunc) http.HandlerFunc {
 
 		h.ServeHTTP(&mrw, r)
 
-		log.WithFields(logrus.Fields{
+		logger.Log.WithFields(logrus.Fields{
 			"uri":      r.RequestURI,
 			"method":   r.Method,
 			"duration": time.Since(now).String(),
 			"size":     humanize.Bytes(uint64(mrw.responseData.size)),
 			"status":   mrw.responseData.status,
-		}).Info("Ok")
-	}
+		}).Info("http_request")
+	})
 }
 
 func GetSorterURL(repo repository.Repository, conf *config.Config, gen id.GeneratorID) http.HandlerFunc {
@@ -73,11 +72,10 @@ func GetSorterURL(repo repository.Repository, conf *config.Config, gen id.Genera
 			return
 		}
 
-		log := logger.NewLogger()
 		body, err := io.ReadAll(r.Body)
 		r.Body.Close()
 		if err != nil {
-			log.Errorf("Ошибка чтения запроса \"%v\"", err.Error())
+			logger.Log.Errorf("Ошибка чтения запроса \"%v\"", err.Error())
 			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
@@ -95,15 +93,15 @@ func GetSorterURL(repo repository.Repository, conf *config.Config, gen id.Genera
 		for i := 1; i <= maxAttempts; i++ {
 			urlID, err = gen.GetID()
 			if errors.Is(err, id.ErrGetID) {
-				log.Errorf("ERROR: Не удалось сгенерировать ID: %v", err.Error())
+				logger.Log.Errorf("ERROR: Не удалось сгенерировать ID: %v", err.Error())
 				break
 			}
 			err = repo.Set(urlID, urlOrigin)
 			if errors.Is(err, repository.ErrorAlreadyExist) {
-				log.Warnf("Не удалось записать id \"%s\" попытка %d(%d), %v", urlID, i, maxAttempts, err.Error())
+				logger.Log.Warnf("Не удалось записать id \"%s\" попытка %d(%d), %v", urlID, i, maxAttempts, err.Error())
 				continue
 			} else if err != nil {
-				log.Errorf("Не ожиданная ошибка при записи id \"%s\": %v", urlID, err)
+				logger.Log.Errorf("Не ожиданная ошибка при записи id \"%s\": %v", urlID, err)
 				break
 			}
 			break
@@ -117,13 +115,13 @@ func GetSorterURL(repo repository.Repository, conf *config.Config, gen id.Genera
 
 		urlShort, err := url.JoinPath(conf.BaseHTTP, urlID)
 		if err != nil {
-			log.Errorf("Не удалось создать короткий URL \"%v\"", err.Error())
+			logger.Log.Errorf("Не удалось создать короткий URL \"%v\"", err.Error())
 			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 		_, err = rw.Write([]byte(urlShort))
 		if err != nil {
-			log.Errorf("Не удалось записать данные \"%v\"", err.Error())
+			logger.Log.Errorf("Не удалось записать данные \"%v\"", err.Error())
 			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}

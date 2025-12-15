@@ -10,9 +10,10 @@ import (
 
 func NewRouter(repo repository.Repository, conf *config.Config, gen id.GeneratorID) *chi.Mux {
 	router := chi.NewRouter()
+	router.Use(handler.MiddlewareLogging)
 
-	router.Get("/{urlID}", handler.MiddlewareLogging(handler.GetOriginalURL(repo)))
-	router.Post("/", handler.MiddlewareLogging(handler.GetSorterURL(repo, conf, gen)))
+	router.Get("/{urlID}", handler.GetOriginalURL(repo))
+	router.Post("/", handler.GetSorterURL(repo, conf, gen))
 
 	return router
 }
