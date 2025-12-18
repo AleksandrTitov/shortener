@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"errors"
+	"encoding/json"
 	"fmt"
 	"github.com/AleksandrTitov/shortener/internal/config"
 	"github.com/AleksandrTitov/shortener/internal/logger"
@@ -24,6 +24,14 @@ type (
 	mwResponseWriter struct {
 		responseData *responseData
 		http.ResponseWriter
+	}
+
+	requestJSON struct {
+		Url string `json:"url"`
+	}
+
+	responseJSON struct {
+		Result string `json:"result"`
 	}
 )
 
@@ -86,26 +94,7 @@ func GetSorterURL(repo repository.Repository, conf *config.Config, gen id.Genera
 			http.Error(rw, "В данных запроса ожидаться валидный URL", http.StatusBadRequest)
 			return
 		}
-
-		maxAttempts := 15
-		var urlID string
-
-		for i := 1; i <= maxAttempts; i++ {
-			urlID, err = gen.GetID()
-			if errors.Is(err, id.ErrGetID) {
-				logger.Log.Errorf("ERROR: Не удалось сгенерировать ID: %v", err.Error())
-				break
-			}
-			err = repo.Set(urlID, urlOrigin)
-			if errors.Is(err, repository.ErrorAlreadyExist) {
-				logger.Log.Warnf("Не удалось записать id \"%s\" попытка %d(%d), %v", urlID, i, maxAttempts, err.Error())
-				continue
-			} else if err != nil {
-				logger.Log.Errorf("Не ожиданная ошибка при записи id \"%s\": %v", urlID, err)
-				break
-			}
-			break
-		}
+		urlID, err := getURLID(urlOrigin, repo, gen)
 		if err != nil {
 			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
@@ -120,6 +109,62 @@ func GetSorterURL(repo repository.Repository, conf *config.Config, gen id.Genera
 			return
 		}
 		_, err = rw.Write([]byte(urlShort))
+		if err != nil {
+			logger.Log.Errorf("Не удалось записать данные \"%v\"", err.Error())
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
+func GetSorterURLJson(repo repository.Repository, conf *config.Config, gen id.GeneratorID) http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Content-Type") != "application/json" {
+			http.Error(rw, "Разрешен только \"Content-Type: application/json\"", http.StatusBadRequest)
+			return
+		}
+
+		body, err := io.ReadAll(r.Body)
+		r.Body.Close()
+		if err != nil {
+			logger.Log.Errorf("Ошибка чтения запроса \"%v\"", err.Error())
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		var urlOrigin requestJSON
+		err = json.Unmarshal(body, &urlOrigin)
+		if err != nil {
+			logger.Log.Errorf("Ошибка чтения запроса \"%v\"", err.Error())
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		_, err = url.ParseRequestURI(urlOrigin.Url)
+		if err != nil {
+			http.Error(rw, "В данных запроса ожидаться валидный URL", http.StatusBadRequest)
+			return
+		}
+
+		urlID, err := getURLID(urlOrigin.Url, repo, gen)
+		if err != nil {
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		rw.WriteHeader(http.StatusCreated)
+
+		urlShort, err := url.JoinPath(conf.BaseHTTP, urlID)
+		if err != nil {
+			logger.Log.Errorf("Не удалось создать короткий URL \"%v\"", err.Error())
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+		urlShortJSON := responseJSON{
+			Result: urlShort,
+		}
+		resp, _ := json.Marshal(urlShortJSON)
+		_, err = rw.Write(resp)
 		if err != nil {
 			logger.Log.Errorf("Не удалось записать данные \"%v\"", err.Error())
 			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
