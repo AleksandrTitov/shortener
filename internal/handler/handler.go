@@ -27,7 +27,7 @@ type (
 	}
 
 	requestJSON struct {
-		Url string `json:"url"`
+		URL string `json:"url"`
 	}
 
 	responseJSON struct {
@@ -140,13 +140,13 @@ func GetSorterURLJson(repo repository.Repository, conf *config.Config, gen id.Ge
 			return
 		}
 
-		_, err = url.ParseRequestURI(urlOrigin.Url)
+		_, err = url.ParseRequestURI(urlOrigin.URL)
 		if err != nil {
 			http.Error(rw, "В данных запроса ожидаться валидный URL", http.StatusBadRequest)
 			return
 		}
 
-		urlID, err := getURLID(urlOrigin.Url, repo, gen)
+		urlID, err := getURLID(urlOrigin.URL, repo, gen)
 		if err != nil {
 			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
