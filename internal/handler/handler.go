@@ -152,6 +152,7 @@ func GetSorterURLJson(repo repository.Repository, conf *config.Config, gen id.Ge
 			return
 		}
 
+		rw.Header().Set("Content-Type", "application/json")
 		rw.WriteHeader(http.StatusCreated)
 
 		urlShort, err := url.JoinPath(conf.BaseHTTP, urlID)
