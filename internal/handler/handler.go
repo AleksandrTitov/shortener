@@ -12,6 +12,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -87,8 +88,7 @@ func GetSorterURL(repo repository.Repository, conf *config.Config, gen id.Genera
 			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
-		urlOrigin := string(body)
-
+		urlOrigin := strings.TrimSpace(string(body))
 		_, err = url.ParseRequestURI(urlOrigin)
 		if err != nil {
 			http.Error(rw, "В данных запроса ожидаться валидный URL", http.StatusBadRequest)
