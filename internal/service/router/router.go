@@ -11,6 +11,8 @@ import (
 func NewRouter(repo repository.Repository, conf *config.Config, gen id.GeneratorID) *chi.Mux {
 	router := chi.NewRouter()
 	router.Use(handler.MiddlewareLogging)
+	router.Use(handler.MiddlewareGzipRead)
+	router.Use(handler.MiddlewareGzipWrite)
 
 	router.Get("/{urlID}", handler.GetOriginalURL(repo))
 	router.Post("/", handler.GetSorterURL(repo, conf, gen))
