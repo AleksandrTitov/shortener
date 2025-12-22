@@ -1,4 +1,4 @@
-package handler
+package middleware
 
 import (
 	"compress/gzip"
@@ -16,7 +16,7 @@ func (w gzipWriter) Write(b []byte) (int, error) {
 	return w.Writer.Write(b)
 }
 
-func MiddlewareGzipWrite(h http.Handler) http.Handler {
+func GzipWrite(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 			h.ServeHTTP(rw, r)
@@ -37,7 +37,7 @@ func MiddlewareGzipWrite(h http.Handler) http.Handler {
 	})
 }
 
-func MiddlewareGzipRead(h http.Handler) http.Handler {
+func GzipRead(h http.Handler) http.Handler {
 	allowContentTypes := map[string]bool{
 		"application/json":                true,
 		"application/json; charset=utf-8": true,

@@ -6,7 +6,7 @@ import (
 	"github.com/AleksandrTitov/shortener/internal/logger"
 	"github.com/AleksandrTitov/shortener/internal/model/id"
 	"github.com/AleksandrTitov/shortener/internal/repository/memory"
-	"github.com/AleksandrTitov/shortener/internal/service/router"
+	"github.com/AleksandrTitov/shortener/internal/router"
 	"net/http"
 )
 

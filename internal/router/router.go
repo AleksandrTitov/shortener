@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/AleksandrTitov/shortener/internal/config"
 	"github.com/AleksandrTitov/shortener/internal/handler"
+	"github.com/AleksandrTitov/shortener/internal/middleware"
 	"github.com/AleksandrTitov/shortener/internal/model/id"
 	"github.com/AleksandrTitov/shortener/internal/repository"
 	"github.com/go-chi/chi/v5"
@@ -10,9 +11,9 @@ import (
 
 func NewRouter(repo repository.Repository, conf *config.Config, gen id.GeneratorID) *chi.Mux {
 	router := chi.NewRouter()
-	router.Use(handler.MiddlewareLogging)
-	router.Use(handler.MiddlewareGzipRead)
-	router.Use(handler.MiddlewareGzipWrite)
+	router.Use(middleware.Logging)
+	router.Use(middleware.GzipRead)
+	router.Use(middleware.GzipWrite)
 
 	router.Get("/{urlID}", handler.GetOriginalURL(repo))
 	router.Post("/", handler.GetSorterURL(repo, conf, gen))

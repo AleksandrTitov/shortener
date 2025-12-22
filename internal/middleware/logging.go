@@ -1,4 +1,4 @@
-package handler
+package middleware
 
 import (
 	"github.com/AleksandrTitov/shortener/internal/logger"
@@ -32,7 +32,7 @@ func (rw *mwResponseWriter) WriteHeader(statusCode int) {
 	rw.responseData.status = statusCode
 }
 
-func MiddlewareLogging(h http.Handler) http.Handler {
+func Logging(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		now := time.Now()
 

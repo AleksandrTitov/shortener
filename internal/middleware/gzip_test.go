@@ -1,4 +1,4 @@
-package handler
+package middleware
 
 import (
 	"bytes"
@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func Test_MiddlewareGzipWrite(t *testing.T) {
+func Test_GzipWrite(t *testing.T) {
 	inData := `{"url":"http://test.aa"}`
 
 	// Создаем Handler
@@ -28,7 +28,7 @@ func Test_MiddlewareGzipWrite(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// Запускаем Handler с использованием MW функции сжимающей ответ
-	MiddlewareGzipWrite(testHandler).ServeHTTP(w, req)
+	GzipWrite(testHandler).ServeHTTP(w, req)
 
 	// Получаем ответ и распаковываем его
 	gz, err := gzip.NewReader(w.Body)
@@ -45,7 +45,7 @@ func Test_MiddlewareGzipWrite(t *testing.T) {
 	assert.Equal(t, "gzip", w.Header().Get("Content-Encoding"))
 }
 
-func TestMiddlewareGzipRead(t *testing.T) {
+func Test_GzipRead(t *testing.T) {
 	// Тестовые данные
 	inData := `{"url":"http://test.aa"}`
 
@@ -84,5 +84,5 @@ func TestMiddlewareGzipRead(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// Запускаем Handler с использованием MW функции распаковывающей запрос
-	MiddlewareGzipRead(testHandler).ServeHTTP(w, req)
+	GzipRead(testHandler).ServeHTTP(w, req)
 }
