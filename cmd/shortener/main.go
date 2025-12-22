@@ -29,7 +29,7 @@ func main() {
 		} else {
 			n := 0
 			for _, i := range *data {
-				err = stor.Set(i.ShortUrl, i.OriginalUrl)
+				err = stor.Set(i.ShortURL, i.OriginalURL)
 				if err != nil {
 					logger.Log.Warnf("Ошибка записи в хранилище: %v", err)
 				} else {
