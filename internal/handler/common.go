@@ -15,7 +15,7 @@ func getURLID(url string, repo repository.Repository, gen id.GeneratorID) (strin
 	for i := 1; i <= maxAttempts; i++ {
 		urlID, err = gen.GetID()
 		if errors.Is(err, id.ErrGetID) {
-			logger.Log.Errorf("ERROR: Не удалось сгенерировать ID: %v", err.Error())
+			logger.Log.Errorf("Не удалось сгенерировать ID: %v", err.Error())
 			break
 		}
 		err = repo.Set(urlID, url)
