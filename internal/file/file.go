@@ -11,8 +11,8 @@ import (
 
 type (
 	ShorterItem struct {
-		ShortUrl    string `json:"short_url"`
-		OriginalUrl string `json:"original_url"`
+		ShortURL    string `json:"short_url"`
+		OriginalURL string `json:"original_url"`
 	}
 	ShorterItems []ShorterItem
 )
@@ -44,7 +44,7 @@ func (items *ShorterItems) LoadShorterItems(filename string) (*ShorterItems, err
 func (items *ShorterItems) SaveShorterItems(filename string, storage repository.Repository) error {
 	logger.Log.Debugf("Сохраняем записи storage в файл %s", filename)
 	for id, originURL := range storage.GetAll() {
-		*items = append(*items, ShorterItem{ShortUrl: id, OriginalUrl: originURL})
+		*items = append(*items, ShorterItem{ShortURL: id, OriginalURL: originURL})
 	}
 	itemsNum := len(*items)
 	logger.Log.Debugf("Найдено записей в storage: %d", itemsNum)
