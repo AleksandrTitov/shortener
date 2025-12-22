@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/AleksandrTitov/shortener/internal/config"
+	"github.com/AleksandrTitov/shortener/internal/file"
 	"github.com/AleksandrTitov/shortener/internal/logger"
 	"github.com/AleksandrTitov/shortener/internal/model/id"
 	"github.com/AleksandrTitov/shortener/internal/repository"
@@ -57,6 +58,15 @@ func GetSorterURL(repo repository.Repository, conf *config.Config, gen id.Genera
 			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
+
+		if conf.FileName != "" {
+			items := file.NewShorterItems()
+			err = items.SaveShorterItems(conf.FileName, repo)
+			if err != nil {
+				logger.Log.Errorf("Не удалось записать данные в файл %s: %v", conf.FileName, err)
+			}
+		}
+
 		_, err = rw.Write([]byte(urlShort))
 		if err != nil {
 			logger.Log.Errorf("Не удалось записать данные \"%v\"", err.Error())
@@ -110,6 +120,15 @@ func GetSorterURLJson(repo repository.Repository, conf *config.Config, gen id.Ge
 			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
+
+		if conf.FileName != "" {
+			items := file.NewShorterItems()
+			err = items.SaveShorterItems(conf.FileName, repo)
+			if err != nil {
+				logger.Log.Errorf("Не удалось записать данные в файл %s: %v", conf.FileName, err)
+			}
+		}
+
 		urlShortJSON := responseJSON{
 			Result: urlShort,
 		}
