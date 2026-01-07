@@ -27,9 +27,12 @@ func (rw *mwResponseWriter) Write(b []byte) (int, error) {
 	return size, err
 }
 
+// WriteHeader TODO: разобраться с "http: superfluous response.WriteHeader call from github.com/AleksandrTitov/shortener/internal/middleware.(*mwResponseWriter).WriteHeader (logging.go:31)"
 func (rw *mwResponseWriter) WriteHeader(statusCode int) {
-	rw.ResponseWriter.WriteHeader(statusCode)
-	rw.responseData.status = statusCode
+	if rw.responseData.status == 0 {
+		rw.ResponseWriter.WriteHeader(statusCode)
+		rw.responseData.status = statusCode
+	}
 }
 
 func Logging(h http.Handler) http.Handler {

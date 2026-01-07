@@ -6,10 +6,11 @@ import (
 )
 
 type Config struct {
-	Addr     string
-	BaseHTTP string
-	LogLevel string
-	FileName string
+	Addr        string
+	BaseHTTP    string
+	LogLevel    string
+	FileName    string
+	DatabaseDSN string
 }
 
 const (
@@ -25,6 +26,7 @@ func NewConfig() *Config {
 	flag.StringVar(&config.BaseHTTP, "b", defaultBaseHTTP, "HTTP адрес сервера в сокращенном URL в формате <http схема>://<хост>:<порт>")
 	flag.StringVar(&config.LogLevel, "l", defaultLogLevel, "Уровень логирования")
 	flag.StringVar(&config.FileName, "f", "", "JSON файл с данными")
+	flag.StringVar(&config.DatabaseDSN, "d", "", "Адрес подключения к базе данных")
 
 	flag.Parse()
 
@@ -46,6 +48,11 @@ func NewConfig() *Config {
 	fileName, ok := os.LookupEnv("FILE_STORAGE_PATH")
 	if ok {
 		config.FileName = fileName
+	}
+
+	databaseDSN, ok := os.LookupEnv("DATABASE_DSN")
+	if ok {
+		config.DatabaseDSN = databaseDSN
 	}
 
 	return &config

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/AleksandrTitov/shortener/internal/config"
+	"github.com/AleksandrTitov/shortener/internal/database"
 	"github.com/AleksandrTitov/shortener/internal/file"
 	"github.com/AleksandrTitov/shortener/internal/logger"
 	"github.com/AleksandrTitov/shortener/internal/model/id"
@@ -157,5 +158,16 @@ func GetOriginalURL(repo repository.Repository) http.HandlerFunc {
 		}
 		rw.Header().Add("Location", urlOrigin)
 		rw.WriteHeader(http.StatusTemporaryRedirect)
+	}
+}
+
+func Ping(conf *config.Config) http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		err := database.Ping(conf)
+		if err != nil {
+			rw.WriteHeader(http.StatusInternalServerError)
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		}
+		rw.WriteHeader(http.StatusOK)
 	}
 }
