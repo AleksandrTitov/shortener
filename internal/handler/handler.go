@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/AleksandrTitov/shortener/internal/config"
 	"github.com/AleksandrTitov/shortener/internal/database"
@@ -13,6 +15,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
 type (
@@ -163,11 +166,24 @@ func GetOriginalURL(repo repository.Repository) http.HandlerFunc {
 
 func Ping(conf *config.Config) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		err := database.Ping(conf)
+		timeout := time.Second * 3
+		ctx, cancel := context.WithTimeout(r.Context(), timeout)
+		defer cancel()
+
+		err := database.Ping(ctx, conf.DatabaseDSN)
 		if err != nil {
+			if errors.Is(err, context.DeadlineExceeded) {
+				logger.Log.Errorf("Проверка подключения к БД завершилась по таймауту(%s): %v", timeout, err)
+			} else {
+				logger.Log.Errorf("Проверка подключения к БД: %v", err)
+			}
 			rw.WriteHeader(http.StatusInternalServerError)
 			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
+
 		rw.WriteHeader(http.StatusOK)
+		rw.Write([]byte("OK"))
+		logger.Log.Debugf("Проверка подключения к БД выполнена успешно")
 	}
 }
