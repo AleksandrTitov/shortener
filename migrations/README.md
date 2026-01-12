@@ -1,11 +1,39 @@
-# migrations
+# db migrations
 
-В данной директории содержатся файлы миграций базы данных.
+### Установка библиотеки
 
-Миграции базы данных — это скрипты, которые позволяют:
+```shell
+go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest 
+```
 
-- версионировать изменения схемы базы данных
-- применять изменения в правильном порядке
-- откатывать изменения при необходимости
+```shell
+go get -u github.com/golang-migrate/migrate/v4 
+```
 
-Тема миграций будет подробно изучаться дальше по курсу.
+### Создание миграции
+
+```shell
+migrate create -ext sql -dir ./migrations -seq <имя миграции>
+```
+
+### Применение
+
+```shell
+migrate -database "postgres://postgres:postgres@localhost:5432/app?sslmode=disable" -path ./migrations up
+```
+
+_Пример_
+```shell
+migrate -database "postgres://postgres:postgres@localhost:5432/app?sslmode=disable" -path ./migrations up
+```
+
+### Откат
+
+```shell
+migrate -database "<dsn>" -path ./migrations down
+```
+
+_Пример_
+```shell
+migrate -database "postgres://postgres:postgres@localhost:5432/app?sslmode=disable" -path ./migrations down
+```
