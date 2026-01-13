@@ -82,7 +82,7 @@ func (a *App) createDatabaseStorage(dsn string) (repository.Repository, error) {
 	db, err := sql.Open("pgx", dsn)
 	a.DB = db
 	if err != nil {
-		logger.Log.Error("Не удалось установить соединение с базой данных: %v", err)
+		logger.Log.Errorf("Не удалось установить соединение с базой данных: %v", err)
 		return nil, err
 	}
 
