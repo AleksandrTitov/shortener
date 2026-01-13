@@ -8,6 +8,10 @@ import (
 
 func main() {
 	a, err := InitializeApp()
+
+	if a.DB != nil {
+		defer a.DB.Close()
+	}
 	if err != nil {
 		logger.Log.Fatal(err.Error())
 		os.Exit(2)
