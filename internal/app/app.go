@@ -65,55 +65,71 @@ func (a *App) CreateServer() (*http.Server, error) {
 }
 
 func (a *App) CreateStorage(conf *config.Config) (repository.Repository, error) {
-	if conf.DatabaseDSN != "" {
-		db, err := sql.Open("pgx", conf.DatabaseDSN)
-		a.DB = db
-		if err != nil {
-			logger.Log.Error("Не удалось установить соединение с базой данных: %v", err)
-			return nil, err
-		}
-
-		err = migrations.MigrateUP(db)
-		if err != nil {
-			logger.Log.Warnf("Не удалось запустить миграцию: %v", err.Error())
-		}
-
-		ctx := context.Background()
-		err = db.PingContext(ctx)
-		if err != nil {
-			logger.Log.Errorf("Не удалось подключиться к базе данных: %v", err)
-			return nil, err
-		}
-
-		stor := database.Storage{
-			Context: ctx,
-			DB:      db,
-		}
-
-		return &stor, nil
-
-	} else if conf.FileName != "" {
-		logger.Log.Infof("Загружаем данные из файла %s", conf.FileName)
-		items := file.NewShorterItems()
-		stor := memory.NewStorage()
-		data, err := items.LoadShorterItems(conf.FileName)
-		if err != nil {
-			logger.Log.Warnf("Ошибка чтения файла данных: %v", err)
-		} else {
-			n := 0
-			for _, i := range *data {
-				err = stor.Set(i.ShortURL, i.OriginalURL)
-				if err != nil {
-					logger.Log.Warnf("Ошибка записи в хранилище: %v", err)
-				} else {
-					n += 1
-				}
-			}
-			logger.Log.Debugf("Загружено записей: %d", n)
-		}
-
-		return stor, nil
+	switch {
+	case conf.DatabaseDSN != "":
+		logger.Log.Info("Используемое хранилище: база данных")
+		return a.createDatabaseStorage(conf.DatabaseDSN)
+	case conf.FileName != "":
+		logger.Log.Info("Используемое хранилище: файловая система")
+		return a.createFileStorage(conf.FileName)
+	default:
+		logger.Log.Info("Используемое хранилище: оперативная память")
+		return a.createMemoryStorage()
 	}
+}
+
+func (a *App) createDatabaseStorage(dsn string) (repository.Repository, error) {
+	db, err := sql.Open("pgx", dsn)
+	a.DB = db
+	if err != nil {
+		logger.Log.Error("Не удалось установить соединение с базой данных: %v", err)
+		return nil, err
+	}
+
+	err = migrations.MigrateUP(db)
+	if err != nil {
+		logger.Log.Warnf("Не удалось запустить миграцию: %v", err.Error())
+	}
+
+	ctx := context.Background()
+	err = db.PingContext(ctx)
+	if err != nil {
+		logger.Log.Errorf("Не удалось подключиться к базе данных: %v", err)
+		return nil, err
+	}
+
+	stor := database.Storage{
+		Context: ctx,
+		DB:      db,
+	}
+
+	return &stor, nil
+}
+
+func (a *App) createFileStorage(filename string) (repository.Repository, error) {
+	logger.Log.Infof("Загружаем данные из файла %s", filename)
+	items := file.NewShorterItems()
+	stor := memory.NewStorage()
+	data, err := items.LoadShorterItems(filename)
+	if err != nil {
+		logger.Log.Warnf("Ошибка чтения файла данных: %v", err)
+	} else {
+		n := 0
+		for _, i := range *data {
+			err = stor.Set(i.ShortURL, i.OriginalURL)
+			if err != nil {
+				logger.Log.Warnf("Ошибка записи в хранилище: %v", err)
+			} else {
+				n += 1
+			}
+		}
+		logger.Log.Debugf("Загружено записей: %d", n)
+	}
+
+	return stor, nil
+}
+
+func (a *App) createMemoryStorage() (repository.Repository, error) {
 	stor := memory.NewStorage()
 	return stor, nil
 }
