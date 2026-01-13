@@ -11,17 +11,7 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-func MigrateUP(dataSourceName string) error {
-	db, err := sql.Open("pgx", dataSourceName)
-	if err != nil {
-		return fmt.Errorf("не удалось открыть базу данных: %w", err)
-	}
-	defer db.Close()
-
-	if err := db.Ping(); err != nil {
-		return fmt.Errorf("не удалось подключиться к базе данных: %w", err)
-	}
-
+func MigrateUP(db *sql.DB) error {
 	// Создаем драйвер для миграций
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
@@ -38,11 +28,6 @@ func MigrateUP(dataSourceName string) error {
 	if err != nil {
 		return fmt.Errorf("не удалось создать экземпляр миграции: %w", err)
 	}
-	defer func() {
-		if m != nil {
-			_, _ = m.Close()
-		}
-	}()
 
 	// Выполняем миграции
 	if err := m.Up(); err != nil {
