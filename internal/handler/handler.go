@@ -228,8 +228,14 @@ func GetShorterURLJsonBatch(repo repository.Repository, conf *config.Config, gen
 			return
 		}
 
+		urls := map[string]string{}
+
 		for _, i := range requestBatch {
-			urlID, err := getURLID(i.OriginalURL, repo, gen)
+			urlID, err := gen.GetID()
+			if errors.Is(err, id.ErrGetID) {
+				logger.Log.Errorf("Не удалось сгенерировать ID: %v", err.Error())
+				break
+			}
 			if err != nil {
 				http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 				return
@@ -245,6 +251,14 @@ func GetShorterURLJsonBatch(repo repository.Repository, conf *config.Config, gen
 				CorrelationID: i.CorrelationID,
 				SortURL:       urlShort,
 			})
+			urls[urlID] = i.OriginalURL
+		}
+
+		err = repo.SetBatch(urls)
+		if err != nil {
+			logger.Log.Errorf("Не удалось сохранть батч \"%v\"", err.Error())
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 
 		rw.Header().Set("Content-Type", "application/json")
@@ -257,6 +271,5 @@ func GetShorterURLJsonBatch(repo repository.Repository, conf *config.Config, gen
 			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
-
 	}
 }

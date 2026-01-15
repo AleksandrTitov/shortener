@@ -25,6 +25,18 @@ func (s *Storage) Set(id, url string) error {
 	return fmt.Errorf("%w: %s", repository.ErrorAlreadyExist, id)
 }
 
+func (s *Storage) SetBatch(urls map[string]string) error {
+	for id, url := range urls {
+		_, ok := s.Store[id]
+		if ok {
+			return fmt.Errorf("%w: %s", repository.ErrorAlreadyExist, id)
+		}
+		s.Store[id] = url
+	}
+
+	return nil
+}
+
 func (s *Storage) Get(id string) (string, bool) {
 	url, ok := s.Store[id]
 	return url, ok
