@@ -26,6 +26,16 @@ type (
 	responseJSON struct {
 		Result string `json:"result"`
 	}
+
+	requestBatchJson struct {
+		CorrelationID string `json:"correlation_id"`
+		OriginalURL   string `json:"original_url"`
+	}
+
+	responseBatchJson struct {
+		CorrelationID string `json:"correlation_id"`
+		SortURL       string `json:"sort_url"`
+	}
 )
 
 func GetSorterURL(repo repository.Repository, conf *config.Config, gen id.GeneratorID) http.HandlerFunc {
@@ -185,5 +195,68 @@ func Ping(conf *config.Config) http.HandlerFunc {
 		rw.WriteHeader(http.StatusOK)
 		rw.Write([]byte("OK"))
 		logger.Log.Debugf("Проверка подключения к БД выполнена успешно")
+	}
+}
+
+func GetShorterURLJsonBatch(repo repository.Repository, conf *config.Config, gen id.GeneratorID) http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		var requestBatch []requestBatchJson
+		var responseBatch []responseBatchJson
+
+		if r.Header.Get("Content-Type") != "application/json" {
+			http.Error(rw, "Разрешен только \"Content-Type: application/json\"", http.StatusBadRequest)
+			return
+		}
+
+		body, err := io.ReadAll(r.Body)
+		r.Body.Close()
+		if err != nil {
+			logger.Log.Errorf("Ошибка чтения запроса \"%v\"", err.Error())
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		err = json.Unmarshal(body, &requestBatch)
+		if err != nil {
+			logger.Log.Errorf("Ошибка чтения запроса \"%v\"", err.Error())
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+		if len(requestBatch) == 0 {
+			logger.Log.Errorf("Пустой батч")
+			http.Error(rw, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+
+		for _, i := range requestBatch {
+			urlID, err := getURLID(i.OriginalURL, repo, gen)
+			if err != nil {
+				http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				return
+			}
+
+			urlShort, err := url.JoinPath(conf.BaseHTTP, urlID)
+			if err != nil {
+				logger.Log.Errorf("Не удалось создать короткий URL \"%v\"", err.Error())
+				http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				return
+			}
+			responseBatch = append(responseBatch, responseBatchJson{
+				CorrelationID: i.CorrelationID,
+				SortURL:       urlShort,
+			})
+		}
+
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusCreated)
+
+		resp, _ := json.Marshal(responseBatch)
+		_, err = rw.Write(resp)
+		if err != nil {
+			logger.Log.Errorf("Не удалось записать данные \"%v\"", err.Error())
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
 	}
 }

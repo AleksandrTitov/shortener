@@ -18,6 +18,7 @@ func NewRouter(repo repository.Repository, conf *config.Config, gen id.Generator
 	router.Get("/{urlID}", handler.GetOriginalURL(repo))
 	router.Post("/", handler.GetSorterURL(repo, conf, gen))
 	router.Post("/api/shorten", handler.GetSorterURLJson(repo, conf, gen))
+	router.Post("/api/shorten/batch", handler.GetShorterURLJsonBatch(repo, conf, gen))
 	router.Get("/ping", handler.Ping(conf))
 
 	return router
