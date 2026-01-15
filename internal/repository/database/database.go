@@ -47,6 +47,28 @@ func (s *Storage) Set(id, url string) error {
 	return nil
 }
 
+func (s *Storage) SetBatch(urls map[string]string) error {
+	tx, err := s.DB.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	
+	for id, url := range urls {
+		_, err = tx.ExecContext(s.Context, "INSERT INTO public.shorter (url_id, original_url) VALUES ($1, $2)", id, url)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *Storage) GetAll() map[string]string {
 	return nil
 }

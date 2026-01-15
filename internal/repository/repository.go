@@ -10,6 +10,7 @@ var (
 type Repository interface {
 	Get(id string) (string, bool)
 	Set(id, url string) error
+	SetBatch(map[string]string) error
 	GetAll() map[string]string
 	Unic(id string) bool
 	Delete(id string) bool
