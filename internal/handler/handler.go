@@ -232,6 +232,17 @@ func GetShorterURLJsonBatch(repo repository.Repository, conf *config.Config, gen
 
 		for _, i := range requestBatch {
 			urlID, err := gen.GetID()
+			if i.OriginalURL == "" {
+				logger.Log.Errorf("Original URL пустой")
+				http.Error(rw, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+				return
+			}
+			if i.CorrelationID == "" {
+				logger.Log.Errorf("Correlation ID пустой")
+				http.Error(rw, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+				return
+			}
+
 			if errors.Is(err, id.ErrGetID) {
 				logger.Log.Errorf("Не удалось сгенерировать ID: %v", err.Error())
 				break
