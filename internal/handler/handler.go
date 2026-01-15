@@ -27,14 +27,14 @@ type (
 		Result string `json:"result"`
 	}
 
-	requestBatchJson struct {
+	requestBatchJSON struct {
 		CorrelationID string `json:"correlation_id"`
 		OriginalURL   string `json:"original_url"`
 	}
 
 	responseBatchJson struct {
 		CorrelationID string `json:"correlation_id"`
-		SortURL       string `json:"sort_url"`
+		SortURL       string `json:"short_url"`
 	}
 )
 
@@ -200,7 +200,7 @@ func Ping(conf *config.Config) http.HandlerFunc {
 
 func GetShorterURLJsonBatch(repo repository.Repository, conf *config.Config, gen id.GeneratorID) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		var requestBatch []requestBatchJson
+		var requestBatch []requestBatchJSON
 		var responseBatch []responseBatchJson
 
 		if r.Header.Get("Content-Type") != "application/json" {
