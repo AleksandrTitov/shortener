@@ -61,13 +61,13 @@ func GetSorterURL(repo repository.Repository, conf *config.Config, gen id.Genera
 		urlID, err := getURLID(urlOrigin, repo, gen)
 
 		switch {
-		case errors.Is(err, repository.ErrorGet):
-			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			return
+		case err == nil:
+			rw.WriteHeader(http.StatusCreated)
 		case errors.Is(err, repository.ErrorOriginNotUnique):
 			rw.WriteHeader(http.StatusConflict)
 		default:
-			rw.WriteHeader(http.StatusCreated)
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 
 		urlShort, err := url.JoinPath(conf.BaseHTTP, urlID)
