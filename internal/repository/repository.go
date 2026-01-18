@@ -3,8 +3,10 @@ package repository
 import "errors"
 
 var (
-	ErrorAlreadyExist = errors.New("запись уже существует")
-	ErrorNotFound     = errors.New("запись не найдена")
+	ErrorAlreadyExist    = errors.New("запись уже существует")
+	ErrorOriginNotUnique = errors.New("запись origin url не уникальна")
+	ErrorNotFound        = errors.New("запись url id не найдена")
+	ErrorGet             = errors.New("ошибка получения значения")
 )
 
 type Repository interface {
