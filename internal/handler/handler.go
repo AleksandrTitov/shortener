@@ -60,16 +60,15 @@ func GetSorterURL(repo repository.Repository, conf *config.Config, gen id.Genera
 		}
 		urlID, err := getURLID(urlOrigin, repo, gen)
 
-		if err != nil {
-			if uniqueViolation := originalURLUniqueViolation(err, repo, conf, rw, urlOrigin); uniqueViolation {
-				return
-			}
-
+		switch {
+		case errors.Is(err, repository.ErrorGet):
 			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
+		case errors.Is(err, repository.ErrorOriginNotUnique):
+			rw.WriteHeader(http.StatusConflict)
+		default:
+			rw.WriteHeader(http.StatusCreated)
 		}
-
-		rw.WriteHeader(http.StatusCreated)
 
 		urlShort, err := url.JoinPath(conf.BaseHTTP, urlID)
 		if err != nil {
@@ -125,16 +124,18 @@ func GetSorterURLJson(repo repository.Repository, conf *config.Config, gen id.Ge
 		}
 
 		urlID, err := getURLID(urlOrigin.URL, repo, gen)
-		if err != nil {
-			if uniqueViolation := originalURLUniqueViolation(err, repo, conf, rw, urlOrigin.URL); uniqueViolation {
-				return
-			}
-			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			return
-		}
 
 		rw.Header().Set("Content-Type", "application/json")
-		rw.WriteHeader(http.StatusCreated)
+
+		switch {
+		case errors.Is(err, repository.ErrorAlreadyExist):
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		case errors.Is(err, repository.ErrorOriginNotUnique):
+			rw.WriteHeader(http.StatusConflict)
+		default:
+			rw.WriteHeader(http.StatusCreated)
+		}
 
 		urlShort, err := url.JoinPath(conf.BaseHTTP, urlID)
 		if err != nil {
