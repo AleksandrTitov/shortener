@@ -128,13 +128,13 @@ func GetSorterURLJson(repo repository.Repository, conf *config.Config, gen id.Ge
 		rw.Header().Set("Content-Type", "application/json")
 
 		switch {
-		case errors.Is(err, repository.ErrorAlreadyExist):
-			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			return
+		case err == nil:
+			rw.WriteHeader(http.StatusCreated)
 		case errors.Is(err, repository.ErrorOriginNotUnique):
 			rw.WriteHeader(http.StatusConflict)
 		default:
-			rw.WriteHeader(http.StatusCreated)
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 
 		urlShort, err := url.JoinPath(conf.BaseHTTP, urlID)
