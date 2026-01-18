@@ -17,9 +17,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	if err = a.Run(); err != nil {
-		logger.Log.Fatal(err.Error())
-	}
+	logger.Log.Fatal(a.Run())
 }
 
 func InitializeApp() (*app.App, error) {

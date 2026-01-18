@@ -59,7 +59,12 @@ func GetSorterURL(repo repository.Repository, conf *config.Config, gen id.Genera
 			return
 		}
 		urlID, err := getURLID(urlOrigin, repo, gen)
+
 		if err != nil {
+			if uniqueViolation := originalURLUniqueViolation(err, repo, conf, rw, urlOrigin); uniqueViolation {
+				return
+			}
+
 			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
@@ -121,6 +126,9 @@ func GetSorterURLJson(repo repository.Repository, conf *config.Config, gen id.Ge
 
 		urlID, err := getURLID(urlOrigin.URL, repo, gen)
 		if err != nil {
+			if uniqueViolation := originalURLUniqueViolation(err, repo, conf, rw, urlOrigin.URL); uniqueViolation {
+				return
+			}
 			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}

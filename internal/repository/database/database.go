@@ -53,7 +53,7 @@ func (s *Storage) SetBatch(urls map[string]string) error {
 		return err
 	}
 	defer tx.Rollback()
-	
+
 	for id, url := range urls {
 		_, err = tx.ExecContext(s.Context, "INSERT INTO public.shorter (url_id, original_url) VALUES ($1, $2)", id, url)
 		if err != nil {
@@ -82,5 +82,14 @@ func (s *Storage) Delete(id string) bool {
 }
 
 func (s *Storage) GetByURL(url string) (string, error) {
-	return "", nil
+	var urlID string
+
+	row := s.DB.QueryRowContext(s.Context, "select url_id from public.shorter where original_url=$1", url)
+
+	err := row.Scan(&urlID)
+	if err != nil {
+		return "", err
+	}
+
+	return urlID, nil
 }
