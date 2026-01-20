@@ -98,12 +98,9 @@ func (a *App) createDatabaseStorage(dsn string) (repository.Repository, error) {
 		return nil, err
 	}
 
-	stor := database.Storage{
-		Context: ctx,
-		DB:      db,
-	}
+	stor := database.NewStorage(ctx, db)
 
-	return &stor, nil
+	return stor, nil
 }
 
 func (a *App) createFileStorage(filename string) (repository.Repository, error) {
