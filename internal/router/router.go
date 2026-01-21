@@ -1,6 +1,7 @@
 package router
 
 import (
+	"database/sql"
 	"github.com/AleksandrTitov/shortener/internal/config"
 	"github.com/AleksandrTitov/shortener/internal/handler"
 	"github.com/AleksandrTitov/shortener/internal/middleware"
@@ -9,7 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func NewRouter(repo repository.Repository, conf *config.Config, gen id.GeneratorID) *chi.Mux {
+func NewRouter(repo repository.Repository, conf *config.Config, gen id.GeneratorID, db *sql.DB) *chi.Mux {
 	router := chi.NewRouter()
 	router.Use(middleware.Logging)
 	router.Use(middleware.GzipRead)
@@ -19,7 +20,6 @@ func NewRouter(repo repository.Repository, conf *config.Config, gen id.Generator
 	router.Post("/", handler.GetSorterURL(repo, conf, gen))
 	router.Post("/api/shorten", handler.GetSorterURLJson(repo, conf, gen))
 	router.Post("/api/shorten/batch", handler.GetShorterURLJsonBatch(repo, conf, gen))
-	router.Get("/ping", handler.Ping(conf))
-
+	router.Get("/ping", handler.Ping(db))
 	return router
 }

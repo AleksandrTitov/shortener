@@ -54,7 +54,7 @@ func (a *App) CreateServer() (*http.Server, error) {
 	}
 
 	gen := id.NewGenerator()
-	r := router.NewRouter(stor, conf, gen)
+	r := router.NewRouter(stor, conf, gen, a.DB)
 
 	server := &http.Server{
 		Addr:    conf.Addr,
