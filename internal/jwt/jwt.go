@@ -8,7 +8,7 @@ import (
 )
 
 const TOKEN_EXP = time.Hour * 3
-const SECRET_KEY = "supersecretkey"
+const SECRET_KEY = "supersecretkey1"
 
 var ErrorInvalidJWT = errors.New("токен недействителен")
 

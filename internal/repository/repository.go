@@ -6,15 +6,19 @@ var (
 	ErrorAlreadyExist    = errors.New("запись уже существует")
 	ErrorOriginNotUnique = errors.New("запись origin url не уникальна")
 	ErrorNotFound        = errors.New("запись url id не найдена")
+	ErrorUserNotFound    = errors.New("пользовательский id не найден")
 	ErrorGet             = errors.New("ошибка получения значения")
 )
 
 type Repository interface {
 	Get(id string) (string, bool)
-	Set(id, url string) error
-	SetBatch(map[string]string) error
-	GetAll() map[string]string
+	GetByURL(url string) (string, error)
+	GetAll() [][]string
+	GetByUserID(userID string) (string, error)
+
+	Set(id, url, userID string) error
+	SetBatch(urls map[string]string, userID string) error
+
 	Unic(id string) bool
 	Delete(id string) bool
-	GetByURL(url string) (string, error)
 }

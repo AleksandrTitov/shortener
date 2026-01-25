@@ -34,8 +34,11 @@ func (s *Storage) Get(id string) (string, bool) {
 	return originalURL, true
 }
 
-func (s *Storage) Set(id, url string) error {
-	result, err := s.db.ExecContext(s.context, "INSERT INTO public.shorter (url_id, original_url) VALUES ($1, $2)", id, url)
+func (s *Storage) Set(id, url, userID string) error {
+	result, err := s.db.ExecContext(
+		s.context,
+		"INSERT INTO public.shorter (url_id, original_url, user_id) VALUES ($1, $2, $3)", id, url, userID,
+	)
 	if err != nil {
 		return err
 	}
@@ -50,7 +53,7 @@ func (s *Storage) Set(id, url string) error {
 	return nil
 }
 
-func (s *Storage) SetBatch(urls map[string]string) error {
+func (s *Storage) SetBatch(urls map[string]string, userID string) error {
 	tx, err := s.db.Begin()
 	if err != nil {
 		return err
@@ -58,7 +61,10 @@ func (s *Storage) SetBatch(urls map[string]string) error {
 	defer tx.Rollback()
 
 	for id, url := range urls {
-		_, err = tx.ExecContext(s.context, "INSERT INTO public.shorter (url_id, original_url) VALUES ($1, $2)", id, url)
+		_, err = tx.ExecContext(
+			s.context,
+			"INSERT INTO public.shorter (url_id, original_url) VALUES ($1, $3)", id, url, userID,
+		)
 		if err != nil {
 			return err
 		}
@@ -72,7 +78,7 @@ func (s *Storage) SetBatch(urls map[string]string) error {
 	return nil
 }
 
-func (s *Storage) GetAll() map[string]string {
+func (s *Storage) GetAll() [][]string {
 	return nil
 }
 
@@ -88,6 +94,19 @@ func (s *Storage) GetByURL(url string) (string, error) {
 	var urlID string
 
 	row := s.db.QueryRowContext(s.context, "select url_id from public.shorter where original_url=$1", url)
+
+	err := row.Scan(&urlID)
+	if err != nil {
+		return "", err
+	}
+
+	return urlID, nil
+}
+
+func (s *Storage) GetByUserID(userID string) (string, error) {
+	var urlID string
+
+	row := s.db.QueryRowContext(s.context, "select url_id from public.shorter where user_id=$1", userID)
 
 	err := row.Scan(&urlID)
 	if err != nil {

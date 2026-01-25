@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-func getURLID(urlOrigin string, repo repository.Repository, gen id.GeneratorID) (string, error) {
+func getURLID(urlOrigin, userID string, repo repository.Repository, gen id.GeneratorID) (string, error) {
 	maxAttempts := 15
 	var urlID string
 	var err error
@@ -23,7 +23,7 @@ func getURLID(urlOrigin string, repo repository.Repository, gen id.GeneratorID) 
 		}
 
 		logger.Log.Debugf("Записываем url oring: '%s', url id: '%s'", urlOrigin, urlID)
-		err = repo.Set(urlID, urlOrigin)
+		err = repo.Set(urlID, urlOrigin, userID)
 		logger.Log.Debugf("Значение записано url oring: '%s', url id: '%s'", urlOrigin, urlID)
 
 		if errors.Is(err, repository.ErrorAlreadyExist) {
