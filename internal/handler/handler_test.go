@@ -69,7 +69,7 @@ func Test_GetOriginalURL(t *testing.T) {
 			// Создаем MemoryStorage и записываем туда значения
 			repo := memory.NewStorage()
 			if test.id != "" {
-				err := repo.Set(test.id, test.url)
+				err := repo.Set(test.id, test.url, "")
 				require.NoError(t, err)
 			}
 

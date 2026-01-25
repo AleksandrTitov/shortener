@@ -45,6 +45,8 @@ func GetSorterURL(repo repository.Repository, conf *config.Config, gen id.Genera
 			return
 		}
 
+		userID := r.Header.Get("X-User-ID")
+
 		body, err := io.ReadAll(r.Body)
 		r.Body.Close()
 		if err != nil {
@@ -58,7 +60,7 @@ func GetSorterURL(repo repository.Repository, conf *config.Config, gen id.Genera
 			http.Error(rw, "В данных запроса ожидаться валидный URL", http.StatusBadRequest)
 			return
 		}
-		urlID, err := getURLID(urlOrigin, repo, gen)
+		urlID, err := getURLID(urlOrigin, userID, repo, gen)
 
 		switch {
 		case err == nil:
@@ -123,7 +125,9 @@ func GetSorterURLJson(repo repository.Repository, conf *config.Config, gen id.Ge
 			return
 		}
 
-		urlID, err := getURLID(urlOrigin.URL, repo, gen)
+		userID := r.Header.Get("X-User-ID")
+
+		urlID, err := getURLID(urlOrigin.URL, userID, repo, gen)
 
 		rw.Header().Set("Content-Type", "application/json")
 
@@ -280,7 +284,9 @@ func GetShorterURLJsonBatch(repo repository.Repository, conf *config.Config, gen
 			urls[urlID] = i.OriginalURL
 		}
 
-		err = repo.SetBatch(urls)
+		userID := r.Header.Get("X-User-ID")
+
+		err = repo.SetBatch(urls, userID)
 		if err != nil {
 			logger.Log.Errorf("Не удалось сохранть батч \"%v\"", err.Error())
 			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

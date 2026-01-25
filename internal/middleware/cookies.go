@@ -36,17 +36,20 @@ func CookiesWrite(h http.Handler) http.Handler {
 		} else {
 			token = cooke.Value
 			userID, err = jwt.GetUserID(token)
-			logger.Log.Infof("Пользователь с User ID: %s", userID)
 			if err != nil {
-				http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				logger.Log.Errorf("Ошибка получения User ID из JWT: %v", err)
+				http.Error(rw, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 				return
 			}
+			logger.Log.Infof("Пользователь с User ID: %s", userID)
 		}
 
 		cookie := http.Cookie{
 			Name:  idToken,
 			Value: token,
 		}
+
+		r.Header.Set("X-User-ID", userID)
 
 		http.SetCookie(rw, &cookie)
 		h.ServeHTTP(rw, r)

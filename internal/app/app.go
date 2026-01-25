@@ -113,7 +113,7 @@ func (a *App) createFileStorage(filename string) (repository.Repository, error) 
 	} else {
 		n := 0
 		for _, i := range *data {
-			err = stor.Set(i.ShortURL, i.OriginalURL)
+			err = stor.Set(i.ShortURL, i.OriginalURL, i.UserID)
 			if err != nil {
 				logger.Log.Warnf("Ошибка записи в хранилище: %v", err)
 			} else {
