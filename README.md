@@ -13,5 +13,10 @@
 
 ### Обращение
 ```shell
-curl -X POST -H "Content-Type: text/plain" -d "https://tst.ru/" http://localhost:8080/
+curl -i -X POST -H "Content-Type: text/plain" -d "https://tst1.ru/" http://localhost:8081/
+```
+
+```shell
+curl -i -b 'id_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjkzNzgyMjAsIlVzZXJJRCI6IjdmYTlhYWZlLTFiM2QtNGY3Ni04YjRmLWIxMmM3ODE3Yjk3OCJ9.C65SJdHisSezNvjm-CboRMmQ5wpAjRm1sXTv18FgkME' \
+-X POST -H "Content-Type: text/plain" -d "http://tst1.ru/" http://localhost:8081/
 ```

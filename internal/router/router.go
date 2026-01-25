@@ -15,6 +15,7 @@ func NewRouter(repo repository.Repository, conf *config.Config, gen id.Generator
 	router.Use(middleware.Logging)
 	router.Use(middleware.GzipRead)
 	router.Use(middleware.GzipWrite)
+	router.Use(middleware.CookiesWrite)
 
 	router.Get("/{urlID}", handler.GetOriginalURL(repo))
 	router.Post("/", handler.GetSorterURL(repo, conf, gen))
