@@ -25,3 +25,9 @@ curl -i -b 'id_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjkzODU4Mj
 curl -i -b 'id_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Njk0Njc3MzcsIlVzZXJJRCI6Ijk3MDYzMGIwLWJjZDAtNDE2MS1hZTRmLTYwYmVhOGMwNzA0ZCJ9.uOqu6B2PuJU--yISmPIYb8I-0v6vhDriMsYnu-Dev2w' \
 -X GET http://localhost:8081/api/user/urls
 ```
+
+```shell
+curl -X POST -H "Content-Type: application/json" \
+  -d '[{"correlation_id": "111111","original_url": "https://practicum1.yandex.ru"},{"correlation_id": "111112","original_url": "https://practicum2.yandex.com"}]' \
+  http://localhost:8081/api/shorten/batch
+```

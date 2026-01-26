@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const TOKEN_EXP = time.Hour * 3
+const tokenExp = time.Hour * 3
 
 var ErrorInvalidJWT = errors.New("токен недействителен")
 
@@ -19,7 +19,7 @@ type Claims struct {
 func BuildJWT(userID, secretKey string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TOKEN_EXP)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(tokenExp)),
 		},
 		UserID: userID,
 	})

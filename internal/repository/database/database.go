@@ -63,7 +63,7 @@ func (s *Storage) SetBatch(urls map[string]string, userID string) error {
 	for id, url := range urls {
 		_, err = tx.ExecContext(
 			s.context,
-			"INSERT INTO public.shorter (url_id, original_url) VALUES ($1, $3)", id, url, userID,
+			"INSERT INTO public.shorter (url_id, original_url, user_id) VALUES ($1, $2, $3)", id, url, userID,
 		)
 		if err != nil {
 			return err
