@@ -9,6 +9,7 @@ import (
 	"github.com/AleksandrTitov/shortener/internal/config"
 	"github.com/AleksandrTitov/shortener/internal/file"
 	"github.com/AleksandrTitov/shortener/internal/logger"
+	"github.com/AleksandrTitov/shortener/internal/middleware"
 	"github.com/AleksandrTitov/shortener/internal/model/id"
 	"github.com/AleksandrTitov/shortener/internal/repository"
 	"io"
@@ -45,7 +46,7 @@ func GetSorterURL(repo repository.Repository, conf *config.Config, gen id.Genera
 			return
 		}
 
-		userID := r.Header.Get("X-User-ID")
+		userID := r.Header.Get(middleware.UserIDHeader)
 
 		body, err := io.ReadAll(r.Body)
 		r.Body.Close()
@@ -125,7 +126,7 @@ func GetSorterURLJson(repo repository.Repository, conf *config.Config, gen id.Ge
 			return
 		}
 
-		userID := r.Header.Get("X-User-ID")
+		userID := r.Header.Get(middleware.UserIDHeader)
 
 		urlID, err := getURLID(urlOrigin.URL, userID, repo, gen)
 
@@ -284,7 +285,7 @@ func GetShorterURLJsonBatch(repo repository.Repository, conf *config.Config, gen
 			urls[urlID] = i.OriginalURL
 		}
 
-		userID := r.Header.Get("X-User-ID")
+		userID := r.Header.Get(middleware.UserIDHeader)
 
 		err = repo.SetBatch(urls, userID)
 		if err != nil {
@@ -309,7 +310,7 @@ func GetShorterURLJsonBatch(repo repository.Repository, conf *config.Config, gen
 func GetUsersURLJson(repo repository.Repository, conf *config.Config) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 
-		userID := r.Header.Get("X-User-ID")
+		userID := r.Header.Get(middleware.UserIDHeader)
 		urls, err := repo.GetByUserID(userID)
 		if err != nil {
 			logger.Log.Errorf("Ошибка получения Users URLs пользователя \"%s\": %v", userID, err)

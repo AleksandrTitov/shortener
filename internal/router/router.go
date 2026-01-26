@@ -13,7 +13,7 @@ import (
 func NewRouter(repo repository.Repository, conf *config.Config, gen id.GeneratorID, db *sql.DB) *chi.Mux {
 	router := chi.NewRouter()
 	router.Use(middleware.Logging)
-	router.Use(middleware.CookiesWrite)
+	router.Use(middleware.CookiesJWT(conf.JWTSecret))
 	router.Use(middleware.GzipRead)
 	router.Use(middleware.GzipWrite)
 

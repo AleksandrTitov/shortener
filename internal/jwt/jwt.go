@@ -8,7 +8,6 @@ import (
 )
 
 const TOKEN_EXP = time.Hour * 3
-const SECRET_KEY = "supersecretkey1"
 
 var ErrorInvalidJWT = errors.New("токен недействителен")
 
@@ -17,7 +16,7 @@ type Claims struct {
 	UserID string
 }
 
-func BuildJWT(userID string) (string, error) {
+func BuildJWT(userID, secretKey string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TOKEN_EXP)),
@@ -25,7 +24,7 @@ func BuildJWT(userID string) (string, error) {
 		UserID: userID,
 	})
 
-	tokenString, err := token.SignedString([]byte(SECRET_KEY))
+	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		return "", err
 	}
@@ -33,11 +32,11 @@ func BuildJWT(userID string) (string, error) {
 	return tokenString, nil
 }
 
-func GetUserID(tokenString string) (string, error) {
+func GetUserID(tokenString, secretKey string) (string, error) {
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims,
 		func(t *jwt.Token) (interface{}, error) {
-			return []byte(SECRET_KEY), nil
+			return []byte(secretKey), nil
 		})
 	if err != nil {
 		return "", err
