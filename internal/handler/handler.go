@@ -305,3 +305,49 @@ func GetShorterURLJsonBatch(repo repository.Repository, conf *config.Config, gen
 		}
 	}
 }
+
+func GetUsersURLJson(repo repository.Repository, conf *config.Config) http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+
+		userID := r.Header.Get("X-User-ID")
+		urls, err := repo.GetByUserID(userID)
+		if err != nil {
+			logger.Log.Errorf("Ошибка получения Users URLs пользователя \"%s\": %v", userID, err)
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		rw.Header().Set("Content-Type", "application/json")
+
+		switch {
+		case len(urls) == 0:
+			rw.WriteHeader(http.StatusNoContent)
+			return
+		default:
+			rw.WriteHeader(http.StatusOK)
+		}
+		for i := range urls {
+			urls[i].URLID, err = url.JoinPath(conf.BaseHTTP, urls[i].URLID)
+			if err != nil {
+				logger.Log.Errorf("Не удалось создать короткий URL \"%v\"", err.Error())
+				http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				return
+			}
+		}
+		logger.Log.Debugf("Users URLs пользователя %s получены: %v", userID, urls)
+
+		resp, err := json.Marshal(urls)
+		if err != nil {
+			logger.Log.Errorf("Ошибка десерелизации Users URLs пользователя \"%s\": %v", userID, err)
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		_, err = rw.Write(resp)
+		if err != nil {
+			logger.Log.Errorf("Не удалось записать данные \"%v\"", err.Error())
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+	}
+}

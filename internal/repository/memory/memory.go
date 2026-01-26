@@ -89,11 +89,17 @@ func (s *Storage) GetByURL(url string) (string, error) {
 	return "", fmt.Errorf("%w: %s", repository.ErrorNotFound, url)
 }
 
-func (s *Storage) GetByUserID(url string) (string, error) {
+func (s *Storage) GetByUserID(userID string) ([]repository.UsersURL, error) {
+	var UsersURLs []repository.UsersURL
+
 	for k, v := range s.Store {
-		if v.UserID == url {
-			return k, nil
+		if v.UserID == userID {
+			usersURL := repository.UsersURL{
+				OriginalURL: v.OriginalURL,
+				URLID:       k,
+			}
+			UsersURLs = append(UsersURLs, usersURL)
 		}
 	}
-	return "", fmt.Errorf("%w: %s", repository.ErrorNotFound, url)
+	return UsersURLs, nil
 }

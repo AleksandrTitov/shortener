@@ -12,10 +12,6 @@ const idToken = "id_token"
 
 func CookiesWrite(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			h.ServeHTTP(rw, r)
-			return
-		}
 		var userID string
 		var token string
 

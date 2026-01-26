@@ -16,7 +16,7 @@ type Config struct {
 const (
 	defaultAddr     = "localhost:8080"
 	defaultBaseHTTP = "http://localhost:8080"
-	defaultLogLevel = "info"
+	defaultLogLevel = "debug"
 )
 
 func NewConfig() *Config {

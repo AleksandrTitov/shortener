@@ -20,3 +20,8 @@ curl -i -X POST -H "Content-Type: text/plain" -d "https://tst1.ru/" http://local
 curl -i -b 'id_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjkzODU4MjQsIlVzZXJJRCI6IjI2MjBhZGRmLTI2YWQtNDdmOC1iN2MxLWJjZGI5ZDliMzY5NyJ9.gldnIf5uvsuD8DJarZjR0MlgcGuBULlJIuOH4ussIHg' \
 -X POST -H "Content-Type: text/plain" -d "https://tst2.ru/" http://localhost:8081/
 ```
+
+```shell
+curl -i -b 'id_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Njk0Njc3MzcsIlVzZXJJRCI6Ijk3MDYzMGIwLWJjZDAtNDE2MS1hZTRmLTYwYmVhOGMwNzA0ZCJ9.uOqu6B2PuJU--yISmPIYb8I-0v6vhDriMsYnu-Dev2w' \
+-X GET http://localhost:8081/api/user/urls
+```
