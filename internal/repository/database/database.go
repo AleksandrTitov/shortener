@@ -106,13 +106,13 @@ func (s *Storage) GetByURL(url string) (string, error) {
 func (s *Storage) GetByUserID(userID string) ([]repository.UsersURL, error) {
 	var UsersURLs []repository.UsersURL
 
-	row, err := s.db.QueryContext(s.context, "select url_id, original_url from public.shorter where user_id=$1", userID)
+	rows, err := s.db.QueryContext(s.context, "select url_id, original_url from public.shorter where user_id=$1", userID)
 	if err != nil {
 		return nil, err
 	}
-	for row.Next() {
+	for rows.Next() {
 		usersURL := repository.UsersURL{}
-		err = row.Scan(
+		err = rows.Scan(
 			&usersURL.URLID,
 			&usersURL.OriginalURL,
 		)
@@ -120,6 +120,11 @@ func (s *Storage) GetByUserID(userID string) ([]repository.UsersURL, error) {
 			return nil, err
 		}
 		UsersURLs = append(UsersURLs, usersURL)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return nil, err
 	}
 
 	return UsersURLs, nil
