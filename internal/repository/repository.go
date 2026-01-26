@@ -10,11 +10,16 @@ var (
 	ErrorGet             = errors.New("ошибка получения значения")
 )
 
+type UsersURL struct {
+	OriginalURL string `json:"original_url"`
+	URLID       string `json:"short_url"`
+}
+
 type Repository interface {
 	Get(id string) (string, bool)
 	GetByURL(url string) (string, error)
 	GetAll() [][]string
-	GetByUserID(userID string) (string, error)
+	GetByUserID(userID string) ([]UsersURL, error)
 
 	Set(id, url, userID string) error
 	SetBatch(urls map[string]string, userID string) error
