@@ -103,3 +103,7 @@ func (s *Storage) GetByUserID(userID string) ([]repository.UsersURL, error) {
 	}
 	return UsersURLs, nil
 }
+
+func (s *Storage) DeleteIDs(userID string, id []string) error {
+	return nil
+}

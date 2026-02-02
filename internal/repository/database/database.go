@@ -129,3 +129,28 @@ func (s *Storage) GetByUserID(userID string) ([]repository.UsersURL, error) {
 
 	return UsersURLs, nil
 }
+
+func (s *Storage) DeleteIDs(userID string, urlsID []string) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	for _, id := range urlsID {
+		_, err = tx.ExecContext(
+			s.context,
+			"update public.shorter set deleted_flag = true where url_id=$1 and user_id=$2", id, userID,
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
