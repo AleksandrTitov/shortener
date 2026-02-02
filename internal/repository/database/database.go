@@ -20,18 +20,22 @@ func NewStorage(ctx context.Context, db *sql.DB) repository.Repository {
 	}
 }
 
-func (s *Storage) Get(id string) (string, bool) {
+func (s *Storage) Get(id string) (string, bool, bool) {
 	var originalURL string
+	var gone bool
 
-	row := s.db.QueryRowContext(s.context, "select original_url from public.shorter where url_id=$1", id)
+	row := s.db.QueryRowContext(s.context, "select original_url, deleted_flag from public.shorter where url_id=$1", id)
 
-	err := row.Scan(&originalURL)
+	err := row.Scan(&originalURL, &gone)
 	if err != nil {
 		logger.Log.Errorf("Ошибка получения ID: %v", err)
-		return "", false
+		return "", false, false
 	}
 
-	return originalURL, true
+	if gone {
+		logger.Log.Debugf("Запрашиваемый ID: %s удален", id)
+	}
+	return originalURL, true, gone
 }
 
 func (s *Storage) Set(id, url, userID string) error {
