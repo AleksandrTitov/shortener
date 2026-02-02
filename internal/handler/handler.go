@@ -178,9 +178,13 @@ func GetOriginalURL(repo repository.Repository) http.HandlerFunc {
 			http.Error(rw, fmt.Sprintf("Длина ID должна быть равна %d символам", id.LenID), http.StatusBadRequest)
 			return
 		}
-		urlOrigin, ok := repo.Get(urlID)
+		urlOrigin, ok, gone := repo.Get(urlID)
 		if !ok {
 			http.Error(rw, fmt.Sprintf("ID \"%s\" не найден", urlID), http.StatusBadRequest)
+			return
+		}
+		if gone {
+			http.Error(rw, fmt.Sprintf("ID \"%s\" удален", urlID), http.StatusGone)
 			return
 		}
 		rw.Header().Add("Location", urlOrigin)
@@ -381,10 +385,17 @@ func DeleteURLs(repo repository.Repository) http.HandlerFunc {
 		logger.Log.Debugf("Сприсок URL на удаление: %v, от пользователя: %s", urlsToDelete, userID)
 		rw.WriteHeader(http.StatusAccepted)
 
-		err = repo.DeleteIDs(userID, urlsToDelete)
-		if err != nil {
-			logger.Log.Error(err)
-		}
-		return
+		go func() {
+			if len(urlsToDelete) == 0 {
+				return
+			}
+
+			err = repo.DeleteIDs(userID, urlsToDelete)
+			if err != nil {
+				logger.Log.Errorf("Ошибка при асинхронном удалении URL для user %s: %v", userID, err)
+			} else {
+				logger.Log.Debugf("Асинхронно удалено %d URL для user %s", len(urlsToDelete), userID)
+			}
+		}()
 	}
 }

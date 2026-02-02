@@ -48,9 +48,9 @@ func (s *Storage) SetBatch(urls map[string]string, userID string) error {
 	return nil
 }
 
-func (s *Storage) Get(id string) (string, bool) {
+func (s *Storage) Get(id string) (string, bool, bool) {
 	data, ok := s.Store[id]
-	return data.OriginalURL, ok
+	return data.OriginalURL, ok, false
 }
 
 func (s *Storage) GetAll() [][]string {

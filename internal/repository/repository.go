@@ -16,7 +16,7 @@ type UsersURL struct {
 }
 
 type Repository interface {
-	Get(id string) (string, bool)
+	Get(id string) (string, bool, bool)
 	GetByURL(url string) (string, error)
 	GetAll() [][]string
 	GetByUserID(userID string) ([]UsersURL, error)
