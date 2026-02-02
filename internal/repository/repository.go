@@ -26,4 +26,5 @@ type Repository interface {
 
 	Unic(id string) bool
 	Delete(id string) bool
+	DeleteIDs(userID string, id []string) error
 }

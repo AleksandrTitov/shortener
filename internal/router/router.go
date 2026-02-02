@@ -23,5 +23,6 @@ func NewRouter(repo repository.Repository, conf *config.Config, gen id.Generator
 	router.Post("/api/shorten/batch", handler.GetShorterURLJsonBatch(repo, conf, gen))
 	router.Get("/ping", handler.Ping(db))
 	router.Get("/api/user/urls", handler.GetUsersURLJson(repo, conf))
+	router.Delete("/api/user/urls", handler.DeleteURLs(repo))
 	return router
 }

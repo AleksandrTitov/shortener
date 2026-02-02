@@ -352,3 +352,39 @@ func GetUsersURLJson(repo repository.Repository, conf *config.Config) http.Handl
 		}
 	}
 }
+
+func DeleteURLs(repo repository.Repository) http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Content-Type") != "application/json" {
+			http.Error(rw, "Разрешен только \"Content-Type: application/json\"", http.StatusBadRequest)
+			return
+		}
+
+		body, err := io.ReadAll(r.Body)
+		r.Body.Close()
+		if err != nil {
+			logger.Log.Errorf("Ошибка чтения запроса \"%v\"", err.Error())
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		userID := r.Header.Get(middleware.UserIDHeader)
+
+		var urlsToDelete []string
+		err = json.Unmarshal(body, &urlsToDelete)
+		if err != nil {
+			logger.Log.Errorf("Ошибка десерелизации Users URLs пользователя \"%s\": %v", userID, err)
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		logger.Log.Debugf("Сприсок URL на удаление: %v, от пользователя: %s", urlsToDelete, userID)
+		rw.WriteHeader(http.StatusAccepted)
+
+		err = repo.DeleteIDs(userID, urlsToDelete)
+		if err != nil {
+			logger.Log.Error(err)
+		}
+		return
+	}
+}
