@@ -46,7 +46,11 @@ func GetSorterURL(repo repository.Repository, conf *config.Config, gen id.Genera
 			return
 		}
 
-		userID := r.Header.Get(middleware.UserIDHeader)
+		userID, err := middleware.MustUserIDFromContext(r.Context())
+		if err != nil {
+			logger.Log.Errorf("Ошибка получения user id: %v", err.Error())
+		}
+		logger.Log.Debugf("Пользователь %s получен из контекста", userID)
 
 		body, err := io.ReadAll(r.Body)
 		r.Body.Close()
@@ -126,7 +130,11 @@ func GetSorterURLJson(repo repository.Repository, conf *config.Config, gen id.Ge
 			return
 		}
 
-		userID := r.Header.Get(middleware.UserIDHeader)
+		userID, err := middleware.MustUserIDFromContext(r.Context())
+		if err != nil {
+			logger.Log.Errorf("Ошибка получения user id: %v", err.Error())
+		}
+		logger.Log.Debugf("Пользователь %s получен из контекста", userID)
 
 		urlID, err := getURLID(urlOrigin.URL, userID, repo, gen)
 
@@ -289,7 +297,11 @@ func GetShorterURLJsonBatch(repo repository.Repository, conf *config.Config, gen
 			urls[urlID] = i.OriginalURL
 		}
 
-		userID := r.Header.Get(middleware.UserIDHeader)
+		userID, err := middleware.MustUserIDFromContext(r.Context())
+		if err != nil {
+			logger.Log.Errorf("Ошибка получения user id: %v", err.Error())
+		}
+		logger.Log.Debugf("Пользователь %s получен из контекста", userID)
 
 		err = repo.SetBatch(urls, userID)
 		if err != nil {
@@ -314,7 +326,12 @@ func GetShorterURLJsonBatch(repo repository.Repository, conf *config.Config, gen
 func GetUsersURLJson(repo repository.Repository, conf *config.Config) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 
-		userID := r.Header.Get(middleware.UserIDHeader)
+		userID, err := middleware.MustUserIDFromContext(r.Context())
+		if err != nil {
+			logger.Log.Errorf("Ошибка получения user id: %v", err.Error())
+		}
+		logger.Log.Debugf("Пользователь %s получен из контекста", userID)
+
 		urls, err := repo.GetByUserID(userID)
 		if err != nil {
 			logger.Log.Errorf("Ошибка получения Users URLs пользователя \"%s\": %v", userID, err)
@@ -372,7 +389,11 @@ func DeleteURLs(repo repository.Repository) http.HandlerFunc {
 			return
 		}
 
-		userID := r.Header.Get(middleware.UserIDHeader)
+		userID, err := middleware.MustUserIDFromContext(r.Context())
+		if err != nil {
+			logger.Log.Errorf("Ошибка получения user id: %v", err.Error())
+		}
+		logger.Log.Debugf("Пользователь %s получен из контекста", userID)
 
 		var urlsToDelete []string
 		err = json.Unmarshal(body, &urlsToDelete)
