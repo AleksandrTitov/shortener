@@ -48,9 +48,14 @@ func (s *Storage) SetBatch(urls map[string]string, userID string) error {
 	return nil
 }
 
-func (s *Storage) Get(id string) (string, bool, bool) {
+func (s *Storage) Get(id string) (string, error) {
 	data, ok := s.Store[id]
-	return data.OriginalURL, ok, false
+
+	if !ok {
+		return "", repository.ErrorNotFound
+	}
+	
+	return data.OriginalURL, nil
 }
 
 func (s *Storage) GetAll() [][]string {
