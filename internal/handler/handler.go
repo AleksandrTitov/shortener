@@ -180,11 +180,11 @@ func GetOriginalURL(repo repository.Repository) http.HandlerFunc {
 		}
 		urlOrigin, ok, gone := repo.Get(urlID)
 		if !ok {
-			http.Error(rw, fmt.Sprintf("ID \"%s\" не найден", urlID), http.StatusBadRequest)
+			http.Error(rw, fmt.Sprintf("ID %q не найден", urlID), http.StatusBadRequest)
 			return
 		}
 		if gone {
-			http.Error(rw, fmt.Sprintf("ID \"%s\" удален", urlID), http.StatusGone)
+			http.Error(rw, fmt.Sprintf("ID %q удален", urlID), http.StatusGone)
 			return
 		}
 		rw.Header().Add("Location", urlOrigin)
