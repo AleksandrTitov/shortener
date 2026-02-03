@@ -1,7 +1,9 @@
 package middleware
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"github.com/AleksandrTitov/shortener/internal/jwt"
 	"github.com/AleksandrTitov/shortener/internal/logger"
 	"github.com/AleksandrTitov/shortener/internal/model/userid"
@@ -9,9 +11,28 @@ import (
 )
 
 const (
-	idToken      = "id_token"
-	UserIDHeader = "X-User-ID"
+	idToken   = "id_token"
+	userIDKey = "userID"
 )
+
+func UserIDFromContext(ctx context.Context) (string, bool) {
+	value := ctx.Value(userIDKey)
+	if value == nil {
+		return "", false
+	}
+	userID, ok := value.(string)
+	return userID, ok
+}
+
+func MustUserIDFromContext(ctx context.Context) (string, error) {
+	userID, ok := UserIDFromContext(ctx)
+
+	if !ok {
+		return "", fmt.Errorf("userID не обнаружен в контексте")
+	}
+
+	return userID, nil
+}
 
 func CookiesJWT(secretKey string) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
@@ -53,10 +74,11 @@ func CookiesJWT(secretKey string) func(http.Handler) http.Handler {
 				Value: token,
 			}
 
-			r.Header.Set(UserIDHeader, userID)
+			ctx := context.WithValue(r.Context(), userIDKey, userID)
+			reqWithContext := r.WithContext(ctx)
 
 			http.SetCookie(rw, &cookie)
-			h.ServeHTTP(rw, r)
+			h.ServeHTTP(rw, reqWithContext)
 		})
 	}
 }
