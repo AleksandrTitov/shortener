@@ -178,15 +178,15 @@ func GetOriginalURL(repo repository.Repository) http.HandlerFunc {
 			http.Error(rw, fmt.Sprintf("Длина ID должна быть равна %d символам", id.LenID), http.StatusBadRequest)
 			return
 		}
-		urlOrigin, ok, gone := repo.Get(urlID)
-		if !ok {
+		urlOrigin, err := repo.Get(urlID)
+		if errors.Is(err, repository.ErrorGone) {
+			http.Error(rw, fmt.Sprintf("ID %q удален", urlID), http.StatusGone)
+			return
+		} else if err != nil {
 			http.Error(rw, fmt.Sprintf("ID %q не найден", urlID), http.StatusBadRequest)
 			return
 		}
-		if gone {
-			http.Error(rw, fmt.Sprintf("ID %q удален", urlID), http.StatusGone)
-			return
-		}
+
 		rw.Header().Add("Location", urlOrigin)
 		rw.WriteHeader(http.StatusTemporaryRedirect)
 	}

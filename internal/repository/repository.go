@@ -8,6 +8,7 @@ var (
 	ErrorNotFound        = errors.New("запись url id не найдена")
 	ErrorUserNotFound    = errors.New("пользовательский id не найден")
 	ErrorGet             = errors.New("ошибка получения значения")
+	ErrorGone            = errors.New("запись url id помечена как удаленная")
 )
 
 type UsersURL struct {
@@ -16,7 +17,7 @@ type UsersURL struct {
 }
 
 type Repository interface {
-	Get(id string) (string, bool, bool)
+	Get(id string) (string, error)
 	GetByURL(url string) (string, error)
 	GetAll() [][]string
 	GetByUserID(userID string) ([]UsersURL, error)

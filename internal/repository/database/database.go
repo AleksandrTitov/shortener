@@ -20,7 +20,7 @@ func NewStorage(ctx context.Context, db *sql.DB) repository.Repository {
 	}
 }
 
-func (s *Storage) Get(id string) (string, bool, bool) {
+func (s *Storage) Get(id string) (string, error) {
 	var originalURL string
 	var gone bool
 
@@ -29,13 +29,13 @@ func (s *Storage) Get(id string) (string, bool, bool) {
 	err := row.Scan(&originalURL, &gone)
 	if err != nil {
 		logger.Log.Errorf("Ошибка получения ID: %v", err)
-		return "", false, false
+		return "", err
 	}
 
 	if gone {
-		logger.Log.Debugf("Запрашиваемый ID: %s удален", id)
+		return "", repository.ErrorGone
 	}
-	return originalURL, true, gone
+	return originalURL, nil
 }
 
 func (s *Storage) Set(id, url, userID string) error {
