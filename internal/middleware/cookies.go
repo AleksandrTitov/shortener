@@ -21,7 +21,11 @@ func CookiesJWT(secretKey string) func(http.Handler) http.Handler {
 
 			cooke, err := r.Cookie(idToken)
 			if errors.Is(err, http.ErrNoCookie) {
-				userID, _ = userid.New()
+				userID, err = userid.New()
+				if err != nil {
+					http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+					return
+				}
 				logger.Log.Infof("Новый пользователь без токена, создаем новый User ID: %s", userID)
 
 				token, err = jwt.BuildJWT(userID, secretKey)
@@ -30,7 +34,7 @@ func CookiesJWT(secretKey string) func(http.Handler) http.Handler {
 					return
 				}
 			} else if err != nil {
-				logger.Log.Errorf("Ошибка получения cooke \"%s\": %v", idToken, err)
+				logger.Log.Debugf("Ошибка получения cooke %q: %v", idToken, err)
 				http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 				return
 			} else {
