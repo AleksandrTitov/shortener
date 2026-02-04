@@ -112,7 +112,7 @@ func (s *Storage) GetByUserID(userID string) ([]repository.UsersURL, error) {
 
 	rows, err := s.db.QueryContext(s.context, "select url_id, original_url from public.shorter where user_id=$1", userID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("не удалось выполнить запрос: %w", err)
 	}
 	for rows.Next() {
 		usersURL := repository.UsersURL{}
@@ -121,14 +121,14 @@ func (s *Storage) GetByUserID(userID string) ([]repository.UsersURL, error) {
 			&usersURL.OriginalURL,
 		)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("ошибка чтения данных пользователя: %w", err)
 		}
 		UsersURLs = append(UsersURLs, usersURL)
 	}
 
 	err = rows.Err()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ошибка при обработке результатов запроса пользователей: %w", err)
 	}
 
 	return UsersURLs, nil
