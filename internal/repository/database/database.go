@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/AleksandrTitov/shortener/internal/logger"
 	"github.com/AleksandrTitov/shortener/internal/repository"
+	"github.com/lib/pq"
 )
 
 type Storage struct {
@@ -135,26 +136,22 @@ func (s *Storage) GetByUserID(userID string) ([]repository.UsersURL, error) {
 }
 
 func (s *Storage) DeleteIDs(userID string, urlsID []string) error {
-	tx, err := s.db.Begin()
+	logger.Log.Debugf("Получено на удаление %d записей пользователя %s", len(urlsID), userID)
+	result, err := s.db.ExecContext(
+		s.context,
+		"update public.shorter set deleted_flag = true where url_id=any($1) and user_id=$2", pq.Array(urlsID), userID,
+	)
 	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-
-	for _, id := range urlsID {
-		_, err = tx.ExecContext(
-			s.context,
-			"update public.shorter set deleted_flag = true where url_id=$1 and user_id=$2", id, userID,
-		)
-		if err != nil {
-			return err
-		}
+		return fmt.Errorf("ошибка удаления пользовательских url id: %w", err)
 	}
 
-	err = tx.Commit()
+	rows, err := result.RowsAffected()
 	if err != nil {
-		return err
+		logger.Log.Warnf("Не удалось получить количество обновленных строк: %v", err)
+		return nil
 	}
+
+	logger.Log.Debugf("Удалено %d записей пользователя %s", rows, userID)
 
 	return nil
 }
