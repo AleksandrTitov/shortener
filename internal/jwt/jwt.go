@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"errors"
+	"fmt"
 	"github.com/AleksandrTitov/shortener/internal/logger"
 	"github.com/golang-jwt/jwt/v4"
 	"time"
@@ -39,11 +40,10 @@ func GetUserID(tokenString, secretKey string) (string, error) {
 			return []byte(secretKey), nil
 		})
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("ошибка парсинга JWT токена: %w", err)
 	}
 
 	if !token.Valid {
-		logger.Log.Error("Недействительный JWT токен")
 		return "", ErrorInvalidJWT
 	}
 
