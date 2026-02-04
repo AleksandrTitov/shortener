@@ -11,12 +11,19 @@ import (
 )
 
 const (
-	idToken   = "id_token"
-	userIDKey = "userID"
+	idToken = "id_token"
+)
+
+type (
+	contextKey struct{}
+)
+
+var (
+	userIDContextKey = &contextKey{} // Указатель на пустую структуру
 )
 
 func UserIDFromContext(ctx context.Context) (string, bool) {
-	value := ctx.Value(userIDKey)
+	value := ctx.Value(userIDContextKey)
 	if value == nil {
 		return "", false
 	}
@@ -74,7 +81,7 @@ func CookiesJWT(secretKey string) func(http.Handler) http.Handler {
 				Value: token,
 			}
 
-			ctx := context.WithValue(r.Context(), userIDKey, userID)
+			ctx := context.WithValue(r.Context(), userIDContextKey, userID)
 			reqWithContext := r.WithContext(ctx)
 
 			http.SetCookie(rw, &cookie)
