@@ -69,7 +69,7 @@ func CookiesJWT(secretKey string) func(http.Handler) http.Handler {
 				token = cooke.Value
 				userID, err = jwt.GetUserID(token, secretKey)
 				if err != nil {
-					logger.Log.Errorf("Ошибка получения User ID из JWT: %v", err)
+					logger.Log.Debugf("Ошибка получения User ID из JWT: %v", err)
 					http.Error(rw, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 					return
 				}
