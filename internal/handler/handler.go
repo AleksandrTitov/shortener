@@ -46,7 +46,7 @@ func GetSorterURL(repo repository.Repository, conf *config.Config, gen id.Genera
 			return
 		}
 
-		userID, err := middleware.MustUserIDFromContext(r.Context())
+		userID, err := middleware.GetUserIDFromContext(r.Context())
 		if err != nil {
 			logger.Log.Errorf("Ошибка получения user id: %v", err.Error())
 		}
@@ -130,7 +130,7 @@ func GetSorterURLJson(repo repository.Repository, conf *config.Config, gen id.Ge
 			return
 		}
 
-		userID, err := middleware.MustUserIDFromContext(r.Context())
+		userID, err := middleware.GetUserIDFromContext(r.Context())
 		if err != nil {
 			logger.Log.Errorf("Ошибка получения user id: %v", err.Error())
 		}
@@ -297,7 +297,7 @@ func GetShorterURLJsonBatch(repo repository.Repository, conf *config.Config, gen
 			urls[urlID] = i.OriginalURL
 		}
 
-		userID, err := middleware.MustUserIDFromContext(r.Context())
+		userID, err := middleware.GetUserIDFromContext(r.Context())
 		if err != nil {
 			logger.Log.Errorf("Ошибка получения user id: %v", err.Error())
 		}
@@ -326,7 +326,7 @@ func GetShorterURLJsonBatch(repo repository.Repository, conf *config.Config, gen
 func GetUsersURLJson(repo repository.Repository, conf *config.Config) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 
-		userID, err := middleware.MustUserIDFromContext(r.Context())
+		userID, err := middleware.GetUserIDFromContext(r.Context())
 		if err != nil {
 			logger.Log.Errorf("Ошибка получения user id: %v", err.Error())
 		}
@@ -389,7 +389,7 @@ func DeleteURLs(repo repository.Repository) http.HandlerFunc {
 			return
 		}
 
-		userID, err := middleware.MustUserIDFromContext(r.Context())
+		userID, err := middleware.GetUserIDFromContext(r.Context())
 		if err != nil {
 			logger.Log.Errorf("Ошибка получения user id: %v", err.Error())
 		}

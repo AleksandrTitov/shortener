@@ -31,7 +31,7 @@ func UserIDFromContext(ctx context.Context) (string, bool) {
 	return userID, ok
 }
 
-func MustUserIDFromContext(ctx context.Context) (string, error) {
+func GetUserIDFromContext(ctx context.Context) (string, error) {
 	userID, ok := UserIDFromContext(ctx)
 
 	if !ok {
